@@ -1,0 +1,10 @@
+import Router from 'express';
+import { getUsers, Logout, SignInFunction, SignUpFunction, UserInfo } from '../Controllers/ControllerFunctions.js';
+import authenticateMiddleware from '../Middlewars/middleware.js';
+const router=Router();
+router.post('/signup',SignUpFunction);
+router.post('/signin',SignInFunction);
+router.get('/userinfo',authenticateMiddleware,UserInfo);
+router.post('/logout',authenticateMiddleware,Logout);
+router.get('/getusers',authenticateMiddleware,getUsers);
+export default router;
