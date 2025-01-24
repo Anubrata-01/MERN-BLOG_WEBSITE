@@ -1,4 +1,5 @@
 import {
+  FETCH_POSTS_URL,
   FETCH_USER_URL,
   INFO_URL,
   LOGOUT_URL,
@@ -93,7 +94,7 @@ export const getUserInfo = async (setUserIno) => {
 export const fetchUsersData = async (
 ) => {
   try {
-    const response = await fetch(`${FETCH_USER_URL}?limit=5`, {
+    const response = await fetch(`${FETCH_USER_URL}?limit=3`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -109,3 +110,22 @@ export const fetchUsersData = async (
     console.error("Error fetching user info:", error);
   }
 };
+
+export const fetchPostsdata=async(limit)=>{
+  try {
+    const response = await fetch(`${FETCH_POSTS_URL}?limit=${limit}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+    const data = await response.json();
+    if (response.ok) {
+        console.log(data)
+       return data;
+   
+      
+    }
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+  }
+}
