@@ -8,8 +8,11 @@ import { SignIn,SignUp} from './page/SignIn';
 import ErrorPage from './page/ErrorPage';
 import { useAtom } from 'jotai';
 import { userInfoAtom } from './StoreContainer/store.js';
-import ProtectedRoute from './utilities/ProtectedRoute';
+
 import Profile from './page/Profile.jsx';
+import PropTypes from 'prop-types';
+import CreatePost from './page/CreatePost.jsx';
+import { ProtectedRoute, SecureRoute } from './utilities/ProtectedRoute.jsx';
 
 const Redirect=({children})=>{
    const [userInfo] = useAtom(userInfoAtom);
@@ -17,6 +20,9 @@ const Redirect=({children})=>{
     return <Navigate to="/" replace />;
    }
    return children
+}
+Redirect.propTypes ={
+  children:PropTypes.node.isRequired
 }
 
 const router = createBrowserRouter([
@@ -48,6 +54,10 @@ const router = createBrowserRouter([
       {
         path:"/profile",
         element:<ProtectedRoute><Profile/></ProtectedRoute>
+      },
+      {
+        path:"/createpost",
+        element:<SecureRoute><CreatePost/></SecureRoute>
       }
     ],
   },

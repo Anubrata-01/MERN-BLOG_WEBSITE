@@ -1,8 +1,8 @@
 import { useAtom } from "jotai";
 import { userInfoAtom } from "../StoreContainer/store";
 import { Navigate } from "react-router-dom";
-
-const ProtectedRoute = ({ children }) => {
+import PropTypes from "prop-types";
+export const ProtectedRoute = ({ children }) => {
   const [userInfo] = useAtom(userInfoAtom);
 
   if (userInfo?.user) {
@@ -11,5 +11,19 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/signin" replace />;
   }
 };
+export const SecureRoute = ({ children }) => {
+  const [userInfo] = useAtom(userInfoAtom);
 
-export default ProtectedRoute;
+  if (userInfo?.user?.isAdmin) {
+    return children;
+  } else {
+    return <Navigate to="/" replace />;
+  }
+}
+ProtectedRoute.propTypes ={
+  children:PropTypes.node.isRequired
+}
+SecureRoute.propTypes ={
+  children:PropTypes.node.isRequired
+}
+

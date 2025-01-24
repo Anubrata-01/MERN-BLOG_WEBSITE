@@ -1,5 +1,5 @@
 import Router from 'express';
-import { getUsers, Logout, SignInFunction, SignUpFunction, UserInfo } from '../Controllers/ControllerFunctions.js';
+import { createPost, getPosts, getUsers, Logout, SignInFunction, SignUpFunction, uploadImage, UserInfo } from '../Controllers/ControllerFunctions.js';
 import authenticateMiddleware from '../Middlewars/middleware.js';
 const router=Router();
 router.post('/signup',SignUpFunction);
@@ -7,4 +7,7 @@ router.post('/signin',SignInFunction);
 router.get('/userinfo',authenticateMiddleware,UserInfo);
 router.post('/logout',authenticateMiddleware,Logout);
 router.get('/getusers',authenticateMiddleware,getUsers);
+router.post('/upload',authenticateMiddleware,uploadImage);
+router.post('/createpost', authenticateMiddleware, createPost);
+router.get('/getposts', authenticateMiddleware, getPosts);
 export default router;
