@@ -3,7 +3,7 @@ import PropTypes from "prop-types"
 const DashboardUser = ({users}) => {
    if(!users) return "Loading..."
   return (
-   
+   <div>
         <div className="bg-gray-800 p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-bold">Recent Users</h3>
@@ -20,7 +20,7 @@ const DashboardUser = ({users}) => {
               </tr>
             </thead>
             <tbody>
-              {users?users.map((user, index) => (
+              {users.map((user, index) => (
                 <tr key={index} className="border-b border-gray-700">
                   <td className="py-2">
                     {user.image ? (
@@ -38,14 +38,21 @@ const DashboardUser = ({users}) => {
                   <td className="py-2">{user.username}</td>
                   <td className="py-2">{user?.isAdmin?(<p className=" text-red-700 font-medium">Admin</p>):(<p className=" text-gray-400">User</p>)}</td>
                 </tr>
-              )):"Loading..."}
+              ))}
             </tbody>
           </table>
         </div>
-   
+        </div>
   )
 }
-DashboardUser.prototype ={
-  users:PropTypes.array
-}
+DashboardUser.propTypes = {
+  users: PropTypes.arrayOf(
+    PropTypes.shape({
+      image: PropTypes.string,
+      username: PropTypes.string,
+      isAdmin: PropTypes.bool,
+    })
+  ),
+};
+
 export default DashboardUser

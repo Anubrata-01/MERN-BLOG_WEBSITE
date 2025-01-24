@@ -7,14 +7,10 @@ const DashboardComments = () => {
         "Congratulations! You’ve successfully set up Tailwind CSS with Vite...",
       likes: 2,
     },
-    {
-      content:
-        "Want to learn HTML, CSS, and JavaScript by building fun and engaging projects?",
-      likes: 2,
-    },
-    { content: "w", likes: 0 },
+
   ];
   return (
+    <div>
     <div className="bg-gray-800 p-6 rounded-lg shadow-md">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold">Recent Comments</h3>
@@ -38,6 +34,7 @@ const DashboardComments = () => {
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   );
 };
