@@ -140,9 +140,9 @@ export const deleteUserProfile = async (userId, navigate) => {
   }
   navigate("/signin");
 };
-export const fetchUsersData = async () => {
+export const fetchUsersData = async (limit=2) => {
   try {
-    const response = await fetch(`${FETCH_USER_URL}?limit=3`, {
+    const response = await fetch(`${FETCH_USER_URL}?limit=${limit}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

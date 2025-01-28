@@ -9,10 +9,13 @@ import { fetchPostsdata, fetchUsersData } from "../../Functions/handlingFunction
 
 const Dashboard = () => {
   const [userInfo] = useAtom(userInfoAtom);
-
+  const limit=3;
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["usersData", userInfo?.user?.isAdmin],
-    queryFn: fetchUsersData,
+    queryKey: ["usersData", userInfo?.user?.isAdmin,limit],
+    queryFn: ({queryKey})=>{
+        const [ , ,limit]=queryKey;
+        return fetchUsersData(limit)
+    },
     enabled: userInfo?.user?.isAdmin,
   });
 

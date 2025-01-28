@@ -15,7 +15,8 @@ const DashboardProfile = () => {
   });
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [imageFile, setImageFile] = useState(null);
+  const [updatedSuccessMessage,setUpdatedSuccessMessage]=useState(false)
+  // const [imageFile, setImageFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [userInfo, setUserInfo] = useAtom(userInfoAtom);
   const imageRef = useRef(null);
@@ -25,12 +26,14 @@ const DashboardProfile = () => {
   const handleUpdateProfile = async () => {
     try {
       setIsUpdating(true);
+      setUpdatedSuccessMessage(true);
       await updateProfile(profileData, _id, setUserInfo);
     } catch (error) {
       console.error("Error updating profile:", error);
     } finally {
+      setIsUpdating(false)
       setTimeout(() => {
-        setIsUpdating(false);
+        setUpdatedSuccessMessage(false)
       }, 5000);
     }
   };
@@ -41,7 +44,7 @@ const DashboardProfile = () => {
       try {
         // You can add your image upload logic here (e.g., upload to server).
         console.log("Selected file:", file);
-        setImageFile(file);
+        // setImageFile(file);
         setImageFileUrl(URL.createObjectURL(file) )
         const fileName= `${Date.now()}.${file.name.split('.').pop()}`;
         const { data, error } = await supabase.storage
@@ -175,7 +178,7 @@ const DashboardProfile = () => {
           Sign out
         </button>
       </div>
-      {isUpdating && <p className="text-lg text-green-600 font-bold text-center">User Updated Successfully</p>}
+      {updatedSuccessMessage && <p className="text-lg text-green-600 font-bold text-center">User Updated Successfully</p>}
       {/* Delete Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

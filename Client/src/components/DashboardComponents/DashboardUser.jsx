@@ -1,6 +1,7 @@
 
 import PropTypes from "prop-types"
 const DashboardUser = ({users}) => {
+  console.log(users)
    if(!users) return "Loading..."
   return (
    <div>
@@ -23,11 +24,11 @@ const DashboardUser = ({users}) => {
               {users.map((user, index) => (
                 <tr key={index} className="border-b border-gray-700">
                   <td className="py-2">
-                    {user.image ? (
+                    {user.profilePicture ? (
                       <img
-                        src={user.image}
+                        src={user.profilePicture}
                         alt={user.username}
-                        className="w-8 h-8 rounded-full"
+                        className="w-10 h-10 rounded-full"
                       />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
