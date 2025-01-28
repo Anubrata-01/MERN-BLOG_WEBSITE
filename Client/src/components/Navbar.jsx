@@ -1,5 +1,3 @@
-
-
 import { useAtom } from "jotai";
 import { useState, useEffect } from "react";
 import { FaMoon, FaSun, FaBars, FaTimes } from "react-icons/fa";
@@ -16,11 +14,11 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const location = useLocation();
-  const [userInfo,setUserInfo] = useAtom(userInfoAtom);
-  const navigate=useNavigate();
-  useEffect(()=>{
+  const [userInfo, setUserInfo] = useAtom(userInfoAtom);
+  const navigate = useNavigate();
+  useEffect(() => {
     getUserInfo(setUserInfo);
-  },[setUserInfo])
+  }, [setUserInfo]);
   useEffect(() => {
     localStorage.setItem("theme", isDarkMode ? "dark" : "light");
     document.documentElement.setAttribute(
@@ -42,7 +40,7 @@ const Navbar = () => {
     { to: "/about", label: "About" },
     { to: "/projects", label: "Projects" },
   ];
- console.log(userInfo);
+  console.log(userInfo);
   // const profileInitial = userInfo?.user?.username?.[0]?.toUpperCase() || "";
 
   return (
@@ -120,22 +118,32 @@ const Navbar = () => {
                 <div className="relative">
                   <button
                     onClick={toggleProfileMenu}
-                    className="ml-4 flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 text-white"
+                    className="ml-4 flex items-center justify-center w-10 h-10 rounded-full bg-gray-700 text-white"
                   >
-                    {userInfo?.user?.username?.[0].toUpperCase() || ""}
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
+                      {userInfo?.user?.profilePicture ? (
+                        <img
+                          src={userInfo?.user?.profilePicture}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white text-2xl font-bold">
+                          {userInfo?.user?.username?.[0]?.toUpperCase() || "U"}
+                        </span>
+                      )}
+                    </div>
                   </button>
                   {isProfileMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md py-2">
-                       {
-                    userInfo?.user?.isAdmin && (
-                      <Link
-                    to="/profile?tab=dashboard"
-                    className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                  Dashboard
-                  </Link>
-                    )
-                  }
+                      {userInfo?.user?.isAdmin && (
+                        <Link
+                          to="/profile?tab=dashboard"
+                          className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          Dashboard
+                        </Link>
+                      )}
                       <Link
                         to="/profile?tab=profile"
                         className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -143,7 +151,7 @@ const Navbar = () => {
                         Profile
                       </Link>
                       <button
-                        onClick={() => logoutfunction(navigate,setUserInfo)}
+                        onClick={() => logoutfunction(navigate, setUserInfo)}
                         className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
                         Logout
@@ -186,22 +194,32 @@ const Navbar = () => {
             <div className="mt-4">
               <button
                 onClick={toggleProfileMenu}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 text-white mx-auto"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-700 text-white mx-auto"
               >
-                {userInfo?.user?.username?.[0].toUpperCase()}
+                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center">
+                  {userInfo?.user?.profilePicture ? (
+                    <img
+                      src={userInfo?.user?.profilePicture}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white text-2xl font-bold">
+                      {userInfo?.user?.username?.[0]?.toUpperCase() || "U"}
+                    </span>
+                  )}
+                </div>
               </button>
               {isProfileMenuOpen && (
                 <div className="mt-2 bg-white dark:bg-gray-800 shadow-lg rounded-md py-2">
-                  {
-                    userInfo?.user?.isAdmin && (
-                      <Link
-                    to="/profile?tab=dashboard"
-                    className="block px-4 py-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                  Dashboard
-                  </Link>
-                    )
-                  }
+                  {userInfo?.user?.isAdmin && (
+                    <Link
+                      to="/profile?tab=dashboard"
+                      className="block px-4 py-2 cursor-pointer text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Dashboard
+                    </Link>
+                  )}
                   <Link
                     to="/profile?tab=profile"
                     className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -209,7 +227,7 @@ const Navbar = () => {
                     Profile
                   </Link>
                   <button
-                    onClick={() => logoutfunction(navigate,setUserInfo)}
+                    onClick={() => logoutfunction(navigate, setUserInfo)}
                     className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Logout
@@ -217,10 +235,13 @@ const Navbar = () => {
                 </div>
               )}
             </div>
-          ):(
-            <Link to="/signin" className="text-center block px-3 py-2 rounded-md text-base font-medium">
-                  Sign In
-                </Link>
+          ) : (
+            <Link
+              to="/signin"
+              className="text-center block px-3 py-2 rounded-md text-base font-medium"
+            >
+              Sign In
+            </Link>
           )}
         </div>
       )}

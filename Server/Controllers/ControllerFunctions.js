@@ -110,10 +110,135 @@ export const SignInFunction = async (req, res) => {
   }
 };
 
+// Signin with Google
+
+// export const SigninWithGoogle = async (req, res, next) => {
+//   const { email, name, googlePhotoUrl } = req.body;
+//   try {
+//     const user = await UserSchema.findOne({ email });
+//     if (user) {
+//       const token = createToken(user);
+//       const refresh = refreshToken(user);
+//       const { password, ...rest } = user._doc;
+
+//       res.cookie("access_token", token, {
+//         httpOnly: true,
+//         maxAge: 2 * 24 * 60 * 60 * 1000,
+//       });
+//       res.cookie("refresh_access_token", refresh, {
+//         httpOnly: true,
+//         maxAge: 7 * 24 * 60 * 60 * 1000,
+//       });
+//       return res.status(201).json({
+//         message: "Signed in successfully",
+//         rest,
+//       });
+//     }
+//     else{
+//       const generatedPassword =
+//         Math.random().toString(36).slice(-8) +
+//         Math.random().toString(36).slice(-8);
+//       const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+//       const newUser = new UserSchema({
+//         username:
+//           name.toLowerCase().split(' ').join('') +
+//           Math.random().toString(9).slice(-4),
+//         email,
+//         password: hashedPassword,
+//         profilePicture: googlePhotoUrl,
+//       });
+//       await newUser.save();
+//       const token = createToken(user);
+//       const refresh = refreshToken(user);
+//       const { password, ...rest } = user._doc;
+
+//       res.cookie("access_token", token, {
+//         httpOnly: true,
+//         maxAge: 2 * 24 * 60 * 60 * 1000,
+//       });
+//       res.cookie("refresh_access_token", refresh, {
+//         httpOnly: true,
+//         maxAge: 7 * 24 * 60 * 60 * 1000,
+//       });
+//       return res.status(201).json({
+//         message: "Signed in successfully",
+//         rest,
+//       });
+//     }
+//   } catch (error) {
+//     next(error)
+//     console.log("Error in sign in with google", error);
+//   }
+// };
+
+export const SigninWithGoogle = async (req, res, next) => {
+  const { email, name, googlePhotoUrl } = req.body;
+  try {
+    const user = await UserSchema.findOne({ email });
+    if (user) {
+      // User already exists
+      const token = createToken(user);
+      const refresh = refreshToken(user);
+      const { password, ...rest } = user._doc;
+
+      res.cookie("access_token", token, {
+        httpOnly: true,
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+      });
+      res.cookie("refresh_access_token", refresh, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      return res.status(201).json({
+        message: "Signed in successfully",
+        user: rest, // Correct variable name
+      });
+    } else {
+      // User does not exist, create a new one
+      const generatedPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+      const newUser = new UserSchema({
+        username:
+          name.toLowerCase().split(" ").join("") +
+          Math.random().toString(9).slice(-4),
+        email,
+        password: hashedPassword,
+        profilePicture: googlePhotoUrl,
+      });
+      const savedUser = await newUser.save(); // Save the new user
+      const token = createToken(savedUser); // Use savedUser instead of user
+      const refresh = refreshToken(savedUser);
+      const { password, ...rest } = savedUser._doc; // Use savedUser
+
+      res.cookie("access_token", token, {
+        httpOnly: true,
+        maxAge: 2 * 24 * 60 * 60 * 1000,
+      });
+      res.cookie("refresh_access_token", refresh, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      return res.status(201).json({
+        message: "Signed in successfully",
+        user: rest, // Correct variable name
+      });
+    }
+  } catch (error) {
+    next(error); // Pass the error to middleware for handling
+    console.error("Error in sign in with Google:", error);
+  }
+};
+
+
 export const Logout = async (req, res) => {
   try {
     res.clearCookie("accessToken");
+    res.clearCookie("access_token");
     res.clearCookie("refreshaccessToken");
+    res.clearCookie("refresh_access_token");
+
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     console.error("Logout error:", error);
@@ -135,6 +260,7 @@ export const UserInfo = async (req, res) => {
         email: user.email,
         username: user.username,
         isAdmin: user?.isAdmin,
+        profilePicture:user?.profilePicture
       },
     });
   } catch (err) {
@@ -144,51 +270,100 @@ export const UserInfo = async (req, res) => {
 
 export const getUsers = async (req, res, next) => {
   if (!req.user.isAdmin) {
-      return next(errorHandler(403, "You are not allowed to see all users"));
+    return next(errorHandler(403, "You are not allowed to see all users"));
   }
   try {
-      const startIndex = parseInt(req.query.startIndex) || 0;
-      const limit = parseInt(req.query.limit) || 9;
-      const sortDirection = req.query.sort === "asc" ? 1 : -1;
+    const startIndex = parseInt(req.query.startIndex) || 0;
+    const limit = parseInt(req.query.limit) || 9;
+    const sortDirection = req.query.sort === "asc" ? 1 : -1;
 
-      const users = await UserSchema.find()
-          .sort({ createdAt: sortDirection })
-          .skip(startIndex)
-          .limit(limit);
+    const users = await UserSchema.find()
+      .sort({ createdAt: sortDirection })
+      .skip(startIndex)
+      .limit(limit);
 
-      const usersWithoutPassword = users.map((user) => {
-          const { password, ...rest } = user._doc;
-          return rest;
-      });
+    const usersWithoutPassword = users.map((user) => {
+      const { password, ...rest } = user._doc;
+      return rest;
+    });
 
-      const totalUsers = await UserSchema.countDocuments();
+    const totalUsers = await UserSchema.countDocuments();
 
-      const now = new Date();
-      console.log("Now:", now);
+    const now = new Date();
 
-      // Calculate one month ago correctly
-      let oneMonthAgo = new Date();
-      oneMonthAgo.setMonth(now.getMonth() - 1);
-      console.log("One Month Ago:", oneMonthAgo);
+    // Calculate one month ago correctly
+    let oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(now.getMonth() - 1);
 
-      // Add one day to make the comparison strictly greater than
-      const oneDayLater = new Date(oneMonthAgo.getTime() + (24 * 60 * 60 * 1000));
-      console.log("One Day Later:", oneDayLater);
+    // Add one day to make the comparison strictly greater than
+    const oneDayLater = new Date(oneMonthAgo.getTime() + 24 * 60 * 60 * 1000);
 
-      const lastMonthUsers = await UserSchema.countDocuments({
-          createdAt: { $gte: oneDayLater }, // Use $gte for inclusive comparison
-      });
-      console.log("Last Month Users:", lastMonthUsers);
-
-      res.status(200).json({
-          users: usersWithoutPassword,
-          totalUsers,
-          lastMonthUsers,
-      });
+    const lastMonthUsers = await UserSchema.countDocuments({
+      createdAt: { $gte: oneDayLater }, // Use $gte for inclusive comparison
+    });
+    res.status(200).json({
+      users: usersWithoutPassword,
+      totalUsers,
+      lastMonthUsers,
+    });
   } catch (error) {
-      next(error);
+    next(error);
   }
 };
+export const updateUserProfile = async (req, res, next) => {
+  const { username, email, password,profilePicture } = req.body;
+  // Validation
+  if (!username || username.length < 7 || username.length > 20) {
+    return next(
+      errorHandler(400, "Username must be between 7 and 20 characters")
+    );
+  }
+  if (!/^[a-zA-Z0-9]+$/.test(username)) {
+    return next(
+      errorHandler(400, "Username can only contain letters and numbers")
+    );
+  }
+  if (password && password.length < 6) {
+    return next(errorHandler(400, "Password must be at least 6 characters"));
+  }
+
+  try {
+    const hashedPassword = password
+      ? await bcrypt.hash(password, 10)
+      : undefined;
+
+    const updatedUser = await UserSchema.findByIdAndUpdate(
+      req.params.userId,
+      {
+        $set: {
+          username,
+          email,
+          password: hashedPassword || req.user.password,
+          profilePicture
+        },
+      },
+      { new: true }
+    );
+
+    const { password: _, ...rest } = updatedUser._doc;
+    res.status(200).json(rest);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteUser = async (req, res, next) => {
+  if (!req.user.isAdmin && req.user.id !== req.params.userId) {
+    return next(errorHandler(403, "You are not allowed to delete this user"));
+  }
+  try {
+    await UserSchema.findByIdAndDelete(req.params.userId);
+    res.status(200).json("User has been deleted");
+  } catch (error) {
+    next(error);
+  }
+};
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -280,8 +455,19 @@ export const getPosts = async (req, res, next) => {
     const startIndex = parseInt(req, query.startIndex) || 0;
     const limit = parseInt(req.query.limit) || 9;
     const sortDirection = req.query.sort === "asc" ? 1 : -1;
-    const posts = await Post.find()
-      .sort({ createdAt: sortDirection })
+    const posts = await Post.find({
+      ...(req.query.userId && { userId: req.query.userId }),
+      ...(req.query.category && { category: req.query.category }),
+      ...(req.query.slug && { slug: req.query.slug }),
+      ...(req.query.postId && { _id: req.query.postId }),
+      ...(req.query.searchTerm && {
+        $or: [
+          { title: { $regex: req.query.searchTerm, $options: "i" } },
+          { content: { $regex: req.query.searchTerm, $options: "i" } },
+        ],
+      }),
+    })
+      .sort({ updatedAt: sortDirection })
       .skip(startIndex)
       .limit(limit);
     const totalPosts = await Post.countDocuments();

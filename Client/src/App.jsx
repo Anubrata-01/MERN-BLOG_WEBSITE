@@ -4,7 +4,6 @@ import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-rou
 import Home from './page/Home';
 import About from './page/About';
 import Projects from './page/Projects';
-import { SignIn,SignUp} from './page/SignIn';
 import ErrorPage from './page/ErrorPage';
 import { useAtom } from 'jotai';
 import { userInfoAtom } from './StoreContainer/store.js';
@@ -13,6 +12,11 @@ import Profile from './page/Profile.jsx';
 import PropTypes from 'prop-types';
 import CreatePost from './page/CreatePost.jsx';
 import { ProtectedRoute, SecureRoute } from './utilities/ProtectedRoute.jsx';
+import PostPage from './page/PostPage.jsx';
+import SignIn from './page/SignIn.jsx';
+import SignUp from './page/SignUp.jsx';
+import { useEffect } from 'react';
+import { getUserInfo } from './Functions/handlingFunction.js';
 
 const Redirect=({children})=>{
    const [userInfo] = useAtom(userInfoAtom);
@@ -58,12 +62,21 @@ const router = createBrowserRouter([
       {
         path:"/createpost",
         element:<SecureRoute><CreatePost/></SecureRoute>
+      },
+      {
+        path:'/post/:postSlug',
+        element:<PostPage/>
       }
     ],
   },
 ]);
 
 function AppLayout() {
+  const [userInfo,setUserInfo]=useAtom(userInfoAtom);
+  useEffect(()=>{
+    getUserInfo(setUserInfo)
+  },[setUserInfo])
+  console.log(userInfo)
   return (
     <div>
       <Navbar />

@@ -2,16 +2,16 @@ import { FaBars, FaTimes, FaSignOutAlt, FaUser, FaHome, FaUsers, FaComments, FaL
 import { useEffect, useState } from 'react';
 import { userInfoAtom } from '../../StoreContainer/store.js';
 import { useAtom } from 'jotai';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { logoutfunction } from '../../Functions/handlingFunction.js';
 
 const DashboardSidebar = ({ tab }) => {
   const [activeTab, setActiveTab] = useState('');
-  const [userInfo] = useAtom(userInfoAtom);
+  const [userInfo,setUserInfo] = useAtom(userInfoAtom);
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State for controlling the hamburger menu
-
+  const navigate=useNavigate()
   useEffect(() => {
-    // Sync activeTab with the tab prop (from URL query parameter)
     setActiveTab(tab?.toLowerCase() || '');
   }, [tab]);
 
@@ -83,7 +83,7 @@ const DashboardSidebar = ({ tab }) => {
       {/* Sign Out Button */}
       <button
         className="flex items-center space-x-2 text-gray-400 hover:text-white"
-        onClick={() => setActiveTab('signout')} // Handle signout click
+         onClick={()=>logoutfunction(navigate,setUserInfo)} // Handle signout click
       >
         <FaSignOutAlt className="text-xl" />
         <span className="text-lg">Sign out</span>
