@@ -64,51 +64,51 @@ export const SignUpFunction = async (req, res) => {
   }
 };
 
-export const SignInFunction = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+// export const SignInFunction = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).send("Please provide both email and password.");
-    }
+//     if (!email || !password) {
+//       return res.status(400).send("Please provide both email and password.");
+//     }
 
-    const user = await UserSchema.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+//     const user = await UserSchema.findOne({ email });
+//     if (!user) {
+//       return res.status(401).json({ message: "Invalid credentials" });
+//     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
-    }
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       return res.status(401).json({ message: "Invalid credentials" });
+//     }
 
-    const token = createToken(user);
-    const refresh = refreshToken(user);
-    if (!token || !refresh) {
-      return res.status(500).json({ message: "Error creating token" });
-    }
+//     const token = createToken(user);
+//     const refresh = refreshToken(user);
+//     if (!token || !refresh) {
+//       return res.status(500).json({ message: "Error creating token" });
+//     }
 
-    res.cookie("accessToken", token, {
-      httpOnly: true,
-      maxAge: 2 * 24 * 60 * 60 * 1000,
-    }); // Secure cookie for 2 days
-    res.cookie("refreshaccessToken", refresh, {
-      httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    }); // Secure cookie for 2 days
+//     res.cookie("accessToken", token, {
+//       httpOnly: true,
+//       maxAge: 2 * 24 * 60 * 60 * 1000,
+//     }); // Secure cookie for 2 days
+//     res.cookie("refreshaccessToken", refresh, {
+//       httpOnly: true,
+//       maxAge: 7 * 24 * 60 * 60 * 1000,
+//     }); // Secure cookie for 2 days
 
-    return res.status(200).json({
-      message: "Sign in successful",
-      user: {
-        username: user.username,
-        email: user.email, // Avoid sending sensitive information like password in the response
-      },
-    });
-  } catch (error) {
-    console.error("Signin error:", error);
-    res.status(500).json({ message: "Signin failed" });
-  }
-};
+//     return res.status(200).json({
+//       message: "Sign in successful",
+//       user: {
+//         username: user.username,
+//         email: user.email, // Avoid sending sensitive information like password in the response
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Signin error:", error);
+//     res.status(500).json({ message: "Signin failed" });
+//   }
+// };
 
 // Signin with Google
 
@@ -171,6 +171,59 @@ export const SignInFunction = async (req, res) => {
 //   }
 // };
 
+
+export const SignInFunction = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).send("Please provide both email and password.");
+    }
+
+    const user = await UserSchema.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // Generate access and refresh tokens
+    const accessToken = createToken(user);
+    const refreshaccessToken = refreshToken(user);
+    if (!accessToken || !refreshToken) {
+      return res.status(500).json({ message: "Error creating tokens" });
+    }
+
+    // Secure cookie options for production
+    const secureCookieOptions = {
+      httpOnly: true,
+      secure: true, // Set to 'true' only in production for HTTPS
+      maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
+      sameSite: 'strict', // Mitigate CSRF attacks (consider 'lax' for legacy browsers)
+    };
+
+    // Set access token cookie (consider HttpOnlyOnlyCookie for enhanced security)
+    res.cookie("accessToken", accessToken, secureCookieOptions);
+
+    // Set refresh token cookie (consider HttpOnlyOnlyCookie for enhanced security)
+    res.cookie("refreshaccessToken", refreshaccessToken, secureCookieOptions);
+
+    return res.status(200).json({
+      message: "Sign in successful",
+      user: {
+        username: user.username,
+        email: user.email, // Avoid sending sensitive information like password in the response
+      },
+    });
+  } catch (error) {
+    console.error("Signin error:", error);
+    res.status(500).json({ message: "Signin failed" });
+  }
+};
+
 export const SigninWithGoogle = async (req, res, next) => {
   const { email, name, googlePhotoUrl } = req.body;
   try {
@@ -183,10 +236,14 @@ export const SigninWithGoogle = async (req, res, next) => {
 
       res.cookie("access_token", token, {
         httpOnly: true,
+        secure:true,
+        sameSite:"strict",
         maxAge: 2 * 24 * 60 * 60 * 1000,
       });
       res.cookie("refresh_access_token", refresh, {
         httpOnly: true,
+        secure:true,
+        sameSite:"strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       return res.status(201).json({
@@ -217,15 +274,15 @@ export const SigninWithGoogle = async (req, res, next) => {
       res.cookie("access_token", token, {
         httpOnly: true,
         maxAge: 2 * 24 * 60 * 60 * 1000,
-        secure: isProduction,  // This will be false in dev, true in production
-        sameSite:"None"
+        secure:true,
+        sameSite:"strict",
       });
       
       res.cookie("refresh_access_token", refresh, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        secure: isProduction,  // This will be false in dev, true in production
-        sameSite:"None"
+        secure:true,
+        sameSite:"strict",
 
       });
       
