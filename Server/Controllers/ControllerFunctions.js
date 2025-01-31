@@ -14,7 +14,9 @@ const createToken = (user) => {
     if (!process.env.TOKEN_SECRET) {
       throw new Error("TOKEN_SECRET environment variable is not set.");
     }
-    return jwt.sign({ user }, process.env.TOKEN_SECRET, { expiresIn: "2d" });
+    // return jwt.sign({ user }, process.env.TOKEN_SECRET, { expiresIn: "2d" });
+    return jwt.sign({ user }, process.env.TOKEN_SECRET);
+
   } catch (error) {
     console.error("Token creation error:", error);
     throw error; // Re-throw the error for proper handling in SignInFunction
@@ -27,7 +29,7 @@ const refreshToken = (user) => {
     if (!process.env.REFRESH_TOKEN_SECRET) {
       throw new Error("REFRESH_TOKEN_SECRET environment variable is not set.");
     }
-    return jwt.sign({ user }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
+    return jwt.sign({ user }, process.env.REFRESH_TOKEN_SECRET);
   } catch (error) {
     console.error("Refresh Token creation error:", error);
     throw error; // Re-throw the error for proper handling in SignInFunction
@@ -54,11 +56,11 @@ export const SignUpFunction = async (req, res) => {
     const refresh = refreshToken(user);
     res.cookie("accessToken", token, {
       httpOnly: true,
-      maxAge: 2 * 24 * 60 * 60 * 1000,
+      // maxAge: 2 * 24 * 60 * 60 * 1000,
     }); // Secure cookie for 2 days
     res.cookie("refreshaccessToken", refresh, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      // maxAge: 7 * 24 * 60 * 60 * 1000,
     }); // Secure cookie for 2 days
 
     return res.status(201).json({
@@ -210,9 +212,9 @@ export const SignInFunction = async (req, res) => {
     // Secure cookie options for production
     const secureCookieOptions = {
       httpOnly: true,
-      secure: true, // Set to 'true' only in production for HTTPS
-      maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
-      sameSite: 'strict', // Mitigate CSRF attacks (consider 'lax' for legacy browsers)
+      // secure: true, // Set to 'true' only in production for HTTPS
+      // maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
+      // sameSite: 'strict', // Mitigate CSRF attacks (consider 'lax' for legacy browsers)
     };
 
     // Set access token cookie (consider HttpOnlyOnlyCookie for enhanced security)
@@ -249,15 +251,15 @@ export const SigninWithGoogle = async (req, res, next) => {
 
       res.cookie("access_token", token, {
         httpOnly: true,
-        secure:process.env.NODE_ENV,
-        sameSite:"lax",
-        maxAge: 2 * 24 * 60 * 60 * 1000,
+        // secure:process.env.NODE_ENV,
+        // sameSite:"lax",
+        // maxAge: 2 * 24 * 60 * 60 * 1000,
       });
       res.cookie("refresh_access_token", refresh, {
         httpOnly: true,
-        secure:process.env.NODE_ENV,
-        sameSite:"lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        // secure:process.env.NODE_ENV,
+        // sameSite:"lax",
+        // maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       return res.status(201).json({
         message: "Signed in successfully",
@@ -286,16 +288,16 @@ export const SigninWithGoogle = async (req, res, next) => {
 
       res.cookie("access_token", token, {
         httpOnly: true,
-        maxAge: 2 * 24 * 60 * 60 * 1000,
-        secure:process.env.NODE_ENV,
-        sameSite:"lax",
+        // maxAge: 2 * 24 * 60 * 60 * 1000,
+        // secure:process.env.NODE_ENV,
+        // sameSite:"lax",
       });
       
       res.cookie("refresh_access_token", refresh, {
         httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        secure:process.env.NODE_ENV,
-        sameSite:"lax",
+        // maxAge: 7 * 24 * 60 * 60 * 1000,
+        // secure:process.env.NODE_ENV,
+        // sameSite:"lax",
 
       });
       
