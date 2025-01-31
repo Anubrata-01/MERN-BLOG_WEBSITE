@@ -431,7 +431,7 @@ export const createPost = async (req, res, next) => {
 
     // Handle image upload if present
     if (req.file) {
-      const imageUrl = `http://localhost:${process.env.PORT}/uploads/${req.file.filename}`; // Adjust URL based on deployment
+      const imageUrl = `${process.env.CORS_ORIGIN}/uploads/${req.file.filename}`; // Adjust URL based on deployment
       post = new Post({
         ...req.body,
         slug,

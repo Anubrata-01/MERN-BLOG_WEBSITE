@@ -42,5 +42,16 @@ ABC_BLOG was developed to provide a user-friendly and feature-rich blogging expe
 ## Installation
 
 1. **Clone the Repository:**
-   ```bash
+   
    git clone [invalid URL removed]
+
+2.**Navigate to the Project Directory:**
+
+    cd ABC_BLOG
+
+3.**Install Server-Side Dependencies:**
+
+   cd server
+   npm install
+
+4. ****

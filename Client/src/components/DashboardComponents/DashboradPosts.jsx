@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
 
 const DashboradPosts = ({ posts }) => {
-  const backendUrl = "http://localhost:7000";
+  
+console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
 
   return (
     <div>
@@ -34,7 +35,7 @@ const DashboradPosts = ({ posts }) => {
                     <td className="py-2">
                       {post.image ? (
                        <img
-                       src={`${backendUrl}${image}`} // Construct full URL
+                       src={`${import.meta.env.VITE_BACKEND_URL}${image}`} // Construct full URL
                        alt={title}
                        className="w-8 h-8 object-cover rounded"
                    />

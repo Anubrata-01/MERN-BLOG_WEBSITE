@@ -11,8 +11,6 @@ import PostCard from "../components/PostCard.jsx";
 
 const PostPage = () => {
   const { postSlug } = useParams(); // Get slug from URL
-  const backendUrl = "http://localhost:7000";
-
   const { data, isError, isLoading } = useQuery({
     queryKey: ["blogDetails", postSlug],
     queryFn: ({ queryKey }) => {
@@ -67,7 +65,7 @@ const PostPage = () => {
         {image && (
           <div className="mb-6">
             <img
-              src={image.startsWith("http") ? image : `${backendUrl}${image}`} // Handle both relative and absolute paths
+              src={image.startsWith("http") ? image : `${import.meta.env.VITE_BACKEND_URL}${image}`} // Handle both relative and absolute paths
               alt={title}
               className="w-full h-auto rounded-md shadow"
             />

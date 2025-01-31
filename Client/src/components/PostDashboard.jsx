@@ -10,9 +10,6 @@ const PostDashboard = () => {
   const [limit, setLimit] = useState(3); // Initialize with 2 posts
   const [showMore, setShowMore] = useState(true); // Track if there are more posts to show
   const [posts,setPosts]=useState([]);
-  
-
-  const backendUrl = "http://localhost:7000";
 
   const { data: post,isLoading } = useQuery({
     queryKey: ["postsData", userInfo?.user?.isAdmin, limit], 
@@ -61,7 +58,7 @@ const PostDashboard = () => {
                   <td className="px-4 py-3">
                     <Link to={`/post/${post.slug}`}>
                     <img
-                      src={`${backendUrl}${post?.image}`}
+                      src={`${post?.image}`|| post?.image}
                       alt={post.slug}
                       className="w-12 h-12 object-cover rounded-md"
                     />
@@ -98,7 +95,7 @@ const PostDashboard = () => {
                 <p className="text-gray-300">{new Date(post.updatedAt).toLocaleDateString()}</p>
                 <Link to={`/post/${post.slug}`}>
                     <img
-                      src={`${backendUrl}${post?.image}`}
+                      src={`${import.meta.env.VITE_BACKEND_URL}${post?.image}`}
                       alt={post.slug}
                       className="w-12 h-12 object-cover rounded-md"
                     />
