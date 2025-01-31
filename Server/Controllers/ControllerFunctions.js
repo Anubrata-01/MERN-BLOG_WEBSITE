@@ -10,20 +10,30 @@ import { query } from "express";
 dotenv.config();
 const createToken = (user) => {
   try {
+    // Ensure TOKEN_SECRET is set in your environment variables
+    if (!process.env.TOKEN_SECRET) {
+      throw new Error("TOKEN_SECRET environment variable is not set.");
+    }
     return jwt.sign({ user }, process.env.TOKEN_SECRET, { expiresIn: "2d" });
   } catch (error) {
     console.error("Token creation error:", error);
+    throw error; // Re-throw the error for proper handling in SignInFunction
   }
 };
+
 const refreshToken = (user) => {
   try {
-    return jwt.sign({ user }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: "7d",
-    });
+    // Ensure REFRESH_TOKEN_SECRET is set in your environment variables
+    if (!process.env.REFRESH_TOKEN_SECRET) {
+      throw new Error("REFRESH_TOKEN_SECRET environment variable is not set.");
+    }
+    return jwt.sign({ user }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
   } catch (error) {
     console.error("Refresh Token creation error:", error);
+    throw error; // Re-throw the error for proper handling in SignInFunction
   }
 };
+
 export const SignUpFunction = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -232,6 +242,9 @@ export const SigninWithGoogle = async (req, res, next) => {
       // User already exists
       const token = createToken(user);
       const refresh = refreshToken(user);
+      if (!token || !refresh) {
+        return res.status(500).json({ message: "Error creating tokens" });
+      }
       const { password, ...rest } = user._doc;
 
       res.cookie("access_token", token, {
