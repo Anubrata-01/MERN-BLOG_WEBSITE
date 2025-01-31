@@ -228,6 +228,7 @@ export const SignInFunction = async (req, res) => {
       user: {
         username: user.username,
         email: user.email, // Avoid sending sensitive information like password in the response
+        token:accessToken
       },
     });
   } catch (error) {
@@ -235,6 +236,8 @@ export const SignInFunction = async (req, res) => {
     res.status(500).json({ message: "Signin failed" });
   }
 };
+
+const jwt = require('jsonwebtoken');
 
 export const SigninWithGoogle = async (req, res, next) => {
   const { email, name, googlePhotoUrl } = req.body;
@@ -249,21 +252,21 @@ export const SigninWithGoogle = async (req, res, next) => {
       }
       const { password, ...rest } = user._doc;
 
-      res.cookie("access_token", token, {
+      // Set secure cookie options based on environment
+      const secureCookieOptions = {
         httpOnly: true,
-        // secure:process.env.NODE_ENV,
-        // sameSite:"lax",
-        // maxAge: 2 * 24 * 60 * 60 * 1000,
-      });
-      res.cookie("refresh_access_token", refresh, {
-        httpOnly: true,
-        // secure:process.env.NODE_ENV,
-        // sameSite:"lax",
-        // maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax', // Consider 'strict' for enhanced security
+        maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
+      };
+
+      res.cookie("access_token", token, secureCookieOptions);
+      res.cookie("refresh_access_token", refresh, secureCookieOptions);
+
       return res.status(201).json({
         message: "Signed in successfully",
         user: rest, // Correct variable name
+        accessToken: token, // Include access token in response
       });
     } else {
       // User does not exist, create a new one
@@ -272,9 +275,7 @@ export const SigninWithGoogle = async (req, res, next) => {
         Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(generatedPassword, 10);
       const newUser = new UserSchema({
-        username:
-          name.toLowerCase().split(" ").join("") +
-          Math.random().toString(9).slice(-4),
+        username: name.toLowerCase().split(" ").join("") + Math.random().toString(9).slice(-4),
         email,
         password: hashedPassword,
         profilePicture: googlePhotoUrl,
@@ -284,26 +285,20 @@ export const SigninWithGoogle = async (req, res, next) => {
       const refresh = refreshToken(savedUser);
       const { password, ...rest } = savedUser._doc; // Use savedUser
 
-      const isProduction = process.env.NODE_ENV === 'production';
-
-      res.cookie("access_token", token, {
+      const secureCookieOptions = {
         httpOnly: true,
-        // maxAge: 2 * 24 * 60 * 60 * 1000,
-        // secure:process.env.NODE_ENV,
-        // sameSite:"lax",
-      });
-      
-      res.cookie("refresh_access_token", refresh, {
-        httpOnly: true,
-        // maxAge: 7 * 24 * 60 * 60 * 1000,
-        // secure:process.env.NODE_ENV,
-        // sameSite:"lax",
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax', // Consider 'strict' for enhanced security
+        maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
+      };
 
-      });
-      
+      res.cookie("access_token", token, secureCookieOptions);
+      res.cookie("refresh_access_token", refresh, secureCookieOptions);
+
       return res.status(201).json({
         message: "Signed in successfully",
         user: rest, // Correct variable name
+        accessToken: token, // Include access token in response
       });
     }
   } catch (error) {
@@ -312,7 +307,7 @@ export const SigninWithGoogle = async (req, res, next) => {
   }
 };
 
-
+// ... (createToken and refreshToken functions remain the same)
 export const Logout = async (req, res) => {
   try {
     res.clearCookie("accessToken");
