@@ -212,16 +212,20 @@ export const SigninWithGoogle = async (req, res, next) => {
       const refresh = refreshToken(savedUser);
       const { password, ...rest } = savedUser._doc; // Use savedUser
 
+      const isProduction = process.env.NODE_ENV === 'production';
+
       res.cookie("access_token", token, {
         httpOnly: true,
-        sameSite: 'None',
         maxAge: 2 * 24 * 60 * 60 * 1000,
+        secure: isProduction,  // This will be false in dev, true in production
       });
+      
       res.cookie("refresh_access_token", refresh, {
         httpOnly: true,
-        sameSite: 'None',
         maxAge: 7 * 24 * 60 * 60 * 1000,
+        secure: isProduction,  // This will be false in dev, true in production
       });
+      
       return res.status(201).json({
         message: "Signed in successfully",
         user: rest, // Correct variable name
