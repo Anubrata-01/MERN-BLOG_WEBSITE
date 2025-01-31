@@ -214,10 +214,12 @@ export const SigninWithGoogle = async (req, res, next) => {
 
       res.cookie("access_token", token, {
         httpOnly: true,
+        sameSite: 'None',
         maxAge: 2 * 24 * 60 * 60 * 1000,
       });
       res.cookie("refresh_access_token", refresh, {
         httpOnly: true,
+        sameSite: 'None',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       return res.status(201).json({
