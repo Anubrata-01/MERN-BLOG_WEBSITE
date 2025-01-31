@@ -218,12 +218,15 @@ export const SigninWithGoogle = async (req, res, next) => {
         httpOnly: true,
         maxAge: 2 * 24 * 60 * 60 * 1000,
         secure: isProduction,  // This will be false in dev, true in production
+        sameSite:"None"
       });
       
       res.cookie("refresh_access_token", refresh, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
         secure: isProduction,  // This will be false in dev, true in production
+        sameSite:"None"
+
       });
       
       return res.status(201).json({
