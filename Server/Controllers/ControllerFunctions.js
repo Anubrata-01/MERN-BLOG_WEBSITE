@@ -249,14 +249,14 @@ export const SigninWithGoogle = async (req, res, next) => {
 
       res.cookie("access_token", token, {
         httpOnly: true,
-        secure:true,
-        sameSite:"strict",
+        secure:process.env.NODE_ENV,
+        sameSite:"lax",
         maxAge: 2 * 24 * 60 * 60 * 1000,
       });
       res.cookie("refresh_access_token", refresh, {
         httpOnly: true,
-        secure:true,
-        sameSite:"strict",
+        secure:process.env.NODE_ENV,
+        sameSite:"lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
       return res.status(201).json({
@@ -287,15 +287,15 @@ export const SigninWithGoogle = async (req, res, next) => {
       res.cookie("access_token", token, {
         httpOnly: true,
         maxAge: 2 * 24 * 60 * 60 * 1000,
-        secure:true,
-        sameSite:"strict",
+        secure:process.env.NODE_ENV,
+        sameSite:"lax",
       });
       
       res.cookie("refresh_access_token", refresh, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        secure:true,
-        sameSite:"strict",
+        secure:process.env.NODE_ENV,
+        sameSite:"lax",
 
       });
       
