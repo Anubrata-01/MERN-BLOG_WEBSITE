@@ -1,4 +1,4 @@
-export const ProdUrl = "https://job-board-mern-application-backend.onrender.com";
+export const ProdUrl = "https://mern-blog-website-h9r2.onrender.com";
 export const HOST = import.meta.env.PROD ? ProdUrl : import.meta.env.VITE_BACKEND_URL;
 
 export const AUTH_ROUTES=`${HOST}/api/auth`;
