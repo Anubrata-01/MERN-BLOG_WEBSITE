@@ -237,7 +237,6 @@ export const SignInFunction = async (req, res) => {
   }
 };
 
-const jwt = require('jsonwebtoken');
 
 export const SigninWithGoogle = async (req, res, next) => {
   const { email, name, googlePhotoUrl } = req.body;
