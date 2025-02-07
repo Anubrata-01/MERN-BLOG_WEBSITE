@@ -228,7 +228,7 @@ export const SigninWithGoogle = async (req, res, next) => {
         maxAge: 2 * 24 * 60 * 60 * 1000,
       };
 
-      res.cookie("access_token", token, secureCookieOptions);
+      res.cookie("accessToken", token, secureCookieOptions);
 
       return res.status(201).json({
         message: "Signed in successfully",
@@ -257,7 +257,7 @@ export const SigninWithGoogle = async (req, res, next) => {
         maxAge: 2 * 24 * 60 * 60 * 1000,
       };
 
-      res.cookie("access_token", token, secureCookieOptions);
+      res.cookie("accessToken", token, secureCookieOptions);
 
       return res.status(201).json({
         message: "Signed in successfully",
@@ -275,8 +275,12 @@ export const SigninWithGoogle = async (req, res, next) => {
 // ... (createToken and refreshToken functions remain the same)
 export const Logout = async (req, res) => {
   try {
-    res.clearCookie("accessToken");
-    res.clearCookie("access_token");
+    res.clearCookie("accessToken",{
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    // res.clearCookie("access_token");
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     console.error("Logout error:", error);
