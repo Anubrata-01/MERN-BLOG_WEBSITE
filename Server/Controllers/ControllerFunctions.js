@@ -262,13 +262,13 @@ export const SigninWithGoogle = async (req, res, next) => {
 
       const secureCookieOptions = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax', // Consider 'strict' for enhanced security
+        secure: true,
+        sameSite: 'none', // Consider 'strict' for enhanced security
         maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
       };
 
       res.cookie("access_token", token, secureCookieOptions);
-      res.cookie("refresh_access_token", refresh, secureCookieOptions);
+      // res.cookie("refresh_access_token", refresh, secureCookieOptions);
 
       return res.status(201).json({
         message: "Signed in successfully",
