@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-// import axios from "axios";
+import axios from "axios";
 import { CREATE_POST_URL } from "../constant/constantfile";
 import { supabase } from "../supabase";
 
@@ -47,15 +47,12 @@ const CreatePost = () => {
     setPostError(null);
     setPostSuccess(false);
     try {
-      const response = await fetch(CREATE_POST_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // Equivalent to `withCredentials: true` in axios
-        body: formData, // `fetch` automatically sets `Content-Type` for FormData
+      const token = localStorage.getItem("authToken");
+      console.log(token)
+      const response = await axios.post(CREATE_POST_URL, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
       });
-      
-      // const data = await response.json();
-      
       if (response.status === 201) {
         setPostSuccess(true);
         setFormData({ title: "", category: "uncategorized", content: "", image: "" });
