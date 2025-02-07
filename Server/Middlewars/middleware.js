@@ -4,11 +4,7 @@ import jwt from "jsonwebtoken";
 const authenticateMiddleware = async (req, res, next) => {
   try {
     // Dynamically extract access token from multiple sources
-    const accessToken =
-      // req.cookies.access_token ||
-      req.cookies.accessToken ||
-      req.headers.authorization?.split(" ")[1] ||
-      req.query.access_token;
+    const accessToken =req.cookies.accessToken 
 
     if (!accessToken) {
       return res.status(401).json({ error: "Access token is missing." });

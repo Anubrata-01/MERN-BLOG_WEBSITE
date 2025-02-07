@@ -62,7 +62,7 @@ export const SigninFunction = async (data, navigate, setUserInfo) => {
   }
 };
 
-export const logoutfunction = async (navigate, setUserIno) => {
+export const logoutfunction = async (navigate, setUserInfo) => {
   try {
     const response = await fetch(LOGOUT_URL, {
       method: "POST",
@@ -75,15 +75,15 @@ export const logoutfunction = async (navigate, setUserIno) => {
     }
 
     console.log("Success:", response.statusText);
-    localStorage.removeItem("token");
-    setUserIno(null);
+
+    setUserInfo(null);
     navigate("/");
   } catch (error) {
     console.error("Logout error:", error);
   }
 };
 // utils/api.js or any suitable file
-export const getUserInfo = async (setUserIno) => {
+export const getUserInfo = async (setUserInfo) => {
   try {
     const response = await fetch(INFO_URL, {
       method: "GET",
@@ -97,7 +97,7 @@ export const getUserInfo = async (setUserIno) => {
     }
 
     const data = await response.json();
-    setUserIno(data); // Return the fetched data
+    setUserInfo(data); // Return the fetched data
   } catch (error) {
     console.error("Error fetching user info:", error);
     // Return null in case of an error
