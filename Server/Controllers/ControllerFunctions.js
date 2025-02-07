@@ -9,7 +9,7 @@ import Post from "../Models/Post.js";
 import { query } from "express";
 dotenv.config();
 const createToken = (user) => jwt.sign({ id: user._id }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
-const refreshToken = (user) => jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+// const refreshToken = (user) => jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
 
 export const SignUpFunction = async (req, res) => {
@@ -29,7 +29,6 @@ export const SignUpFunction = async (req, res) => {
     const user = new UserSchema({ username, email, password: hashedPassword });
     await user.save();
     const token = createToken(user);
-    const refresh = refreshToken(user);
     const secureCookieOptions = {
       httpOnly: true,
       secure: true,
@@ -37,7 +36,7 @@ export const SignUpFunction = async (req, res) => {
       maxAge: 2 * 24 * 60 * 60 * 1000,
     };
     res.cookie("accessToken", token, secureCookieOptions);
-    // res.cookie("refreshaccessToken", refresh, secureCookieOptions); 
+    
 
     return res.status(201).json({
       message: "User created successfully",
@@ -178,32 +177,28 @@ export const SignInFunction = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Generate access and refresh tokens
+    // Generate access token
     const accessToken = createToken(user);
-    const refreshaccessToken = refreshToken(user);
-    if (!accessToken || !refreshaccessToken) {
+    if (!accessToken) {
       return res.status(500).json({ message: "Error creating tokens" });
     }
 
-   const secureCookieOptions = {
+    const secureCookieOptions = {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
       maxAge: 2 * 24 * 60 * 60 * 1000,
     };
 
-    // Set access token cookie (consider HttpOnlyOnlyCookie for enhanced security)
+    // Set access token cookie
     res.cookie("accessToken", accessToken, secureCookieOptions);
-
-    // Set refresh token cookie (consider HttpOnlyOnlyCookie for enhanced security)
-    // res.cookie("refreshaccessToken", refreshaccessToken, secureCookieOptions);
 
     return res.status(200).json({
       message: "Sign in successful",
       user: {
         username: user.username,
-        email: user.email, // Avoid sending sensitive information like password in the response
-        token:accessToken
+        email: user.email,
+        token: accessToken,
       },
     });
   } catch (error) {
@@ -213,38 +208,34 @@ export const SignInFunction = async (req, res) => {
 };
 
 
+
 export const SigninWithGoogle = async (req, res, next) => {
   const { email, name, googlePhotoUrl } = req.body;
   try {
     const user = await UserSchema.findOne({ email });
     if (user) {
-      // User already exists
-      console.log(user)
+      console.log(user);
       const token = createToken(user);
-      const refresh = refreshToken(user);
-      if (!token || !refresh) {
+      if (!token) {
         return res.status(500).json({ message: "Error creating tokens" });
       }
       const { password, ...rest } = user._doc;
 
-      // Set secure cookie options based on environment
       const secureCookieOptions = {
         httpOnly: true,
         secure: true,
-        sameSite: "none", // Consider 'strict' for enhanced security
-        maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
+        sameSite: "none",
+        maxAge: 2 * 24 * 60 * 60 * 1000,
       };
 
       res.cookie("access_token", token, secureCookieOptions);
-      // res.cookie("refresh_access_token", refresh, secureCookieOptions);
 
       return res.status(201).json({
         message: "Signed in successfully",
-        user: rest, // Correct variable name
-        accessToken: token, // Include access token in response
+        user: rest,
+        accessToken: token,
       });
     } else {
-      // User does not exist, create a new one
       const generatedPassword =
         Math.random().toString(36).slice(-8) +
         Math.random().toString(36).slice(-8);
@@ -255,41 +246,37 @@ export const SigninWithGoogle = async (req, res, next) => {
         password: hashedPassword,
         profilePicture: googlePhotoUrl,
       });
-      const savedUser = await newUser.save(); // Save the new user
-      const token = createToken(savedUser); // Use savedUser instead of user
-      const refresh = refreshToken(savedUser);
-      const { password, ...rest } = savedUser._doc; // Use savedUser
+      const savedUser = await newUser.save();
+      const token = createToken(savedUser);
+      const { password, ...rest } = savedUser._doc;
 
       const secureCookieOptions = {
         httpOnly: true,
         secure: true,
-        sameSite: 'none', // Consider 'strict' for enhanced security
-        maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
+        sameSite: "none",
+        maxAge: 2 * 24 * 60 * 60 * 1000,
       };
 
       res.cookie("access_token", token, secureCookieOptions);
-      // res.cookie("refresh_access_token", refresh, secureCookieOptions);
 
       return res.status(201).json({
         message: "Signed in successfully",
-        user: rest, // Correct variable name
-        accessToken: token, // Include access token in response
+        user: rest,
+        accessToken: token,
       });
     }
   } catch (error) {
-    next(error); // Pass the error to middleware for handling
+    next(error);
     console.error("Error in sign in with Google:", error);
   }
 };
+
 
 // ... (createToken and refreshToken functions remain the same)
 export const Logout = async (req, res) => {
   try {
     res.clearCookie("accessToken");
     res.clearCookie("access_token");
-    res.clearCookie("refreshaccessToken");
-    res.clearCookie("refresh_access_token");
-
     return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
     console.error("Logout error:", error);
