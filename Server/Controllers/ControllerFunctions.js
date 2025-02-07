@@ -8,34 +8,9 @@ import { errorHandler } from "../utils/error.js";
 import Post from "../Models/Post.js";
 import { query } from "express";
 dotenv.config();
-// const createToken = (user) => {
-//   try {
-//     // Ensure TOKEN_SECRET is set in your environment variables
-//     if (!process.env.TOKEN_SECRET) {
-//       throw new Error("TOKEN_SECRET environment variable is not set.");
-//     }
-//     // return jwt.sign({ user }, process.env.TOKEN_SECRET, { expiresIn: "2d" });
-//     return jwt.sign({ id:user._id }, process.env.TOKEN_SECRET);
-
-//   } catch (error) {
-//     console.error("Token creation error:", error);
-//     throw error; // Re-throw the error for proper handling in SignInFunction
-//   }
-// };
 const createToken = (user) => jwt.sign({ id: user._id }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
 const refreshToken = (user) => jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
-// const refreshToken = (user) => {
-//   try {
-//     // Ensure REFRESH_TOKEN_SECRET is set in your environment variables
-//     if (!process.env.REFRESH_TOKEN_SECRET) {
-//       throw new Error("REFRESH_TOKEN_SECRET environment variable is not set.");
-//     }
-//     return jwt.sign({user}, process.env.REFRESH_TOKEN_SECRET);
-//   } catch (error) {
-//     console.error("Refresh Token creation error:", error);
-//     throw error; // Re-throw the error for proper handling in SignInFunction
-//   }
-// };
+
 
 export const SignUpFunction = async (req, res) => {
   try {
@@ -57,12 +32,12 @@ export const SignUpFunction = async (req, res) => {
     const refresh = refreshToken(user);
     const secureCookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 2 * 24 * 60 * 60 * 1000,
     };
     res.cookie("accessToken", token, secureCookieOptions);
-    res.cookie("refreshaccessToken", refresh, secureCookieOptions); 
+    // res.cookie("refreshaccessToken", refresh, secureCookieOptions); 
 
     return res.status(201).json({
       message: "User created successfully",
@@ -206,14 +181,14 @@ export const SignInFunction = async (req, res) => {
     // Generate access and refresh tokens
     const accessToken = createToken(user);
     const refreshaccessToken = refreshToken(user);
-    if (!accessToken || !refreshToken) {
+    if (!accessToken || !refreshaccessToken) {
       return res.status(500).json({ message: "Error creating tokens" });
     }
 
    const secureCookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 2 * 24 * 60 * 60 * 1000,
     };
 
@@ -221,7 +196,7 @@ export const SignInFunction = async (req, res) => {
     res.cookie("accessToken", accessToken, secureCookieOptions);
 
     // Set refresh token cookie (consider HttpOnlyOnlyCookie for enhanced security)
-    res.cookie("refreshaccessToken", refreshaccessToken, secureCookieOptions);
+    // res.cookie("refreshaccessToken", refreshaccessToken, secureCookieOptions);
 
     return res.status(200).json({
       message: "Sign in successful",
@@ -255,13 +230,13 @@ export const SigninWithGoogle = async (req, res, next) => {
       // Set secure cookie options based on environment
       const secureCookieOptions = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax', // Consider 'strict' for enhanced security
+        secure: true,
+        sameSite: "none", // Consider 'strict' for enhanced security
         maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
       };
 
       res.cookie("access_token", token, secureCookieOptions);
-      res.cookie("refresh_access_token", refresh, secureCookieOptions);
+      // res.cookie("refresh_access_token", refresh, secureCookieOptions);
 
       return res.status(201).json({
         message: "Signed in successfully",
