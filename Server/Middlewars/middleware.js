@@ -3,11 +3,18 @@ import jwt from "jsonwebtoken";
 
 const authenticateMiddleware = async (req, res, next) => {
   try {
-    // Normalize cookie names
-    const { accessToken, refreshToken } = {
-      accessToken: req.cookies.accessToken || req.cookies.access_token,
-      refreshToken: req.cookies.refreshaccessToken || req.cookies.refresh_access_token,
-    };
+    // Dynamically extract tokens from multiple sources
+    const accessToken =
+      req.cookies.accessToken || 
+      req.cookies.access_token || 
+      req.headers.authorization?.split(" ")[1] || 
+      req.query.access_token;
+
+    const refreshToken =
+      req.cookies.refreshaccessToken || 
+      req.cookies.refresh_access_token || 
+      req.headers["x-refresh-token"] || 
+      req.query.refresh_token;
 
     const accessTokenSecret = process.env.TOKEN_SECRET;
     const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
@@ -39,7 +46,7 @@ const authenticateMiddleware = async (req, res, next) => {
     }
 
     // Find user by decoded token's user ID
-    const user = await UserSchema.findById(decoded.user?._id).select("-password");
+    const user = await UserSchema.findById(decoded.id).select("-password");
     if (!user) {
       return res.status(401).json({ error: "User not found." });
     }
@@ -54,3 +61,4 @@ const authenticateMiddleware = async (req, res, next) => {
 };
 
 export default authenticateMiddleware;
+

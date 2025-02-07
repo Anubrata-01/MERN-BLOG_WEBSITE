@@ -8,33 +8,34 @@ import { errorHandler } from "../utils/error.js";
 import Post from "../Models/Post.js";
 import { query } from "express";
 dotenv.config();
-const createToken = (user) => {
-  try {
-    // Ensure TOKEN_SECRET is set in your environment variables
-    if (!process.env.TOKEN_SECRET) {
-      throw new Error("TOKEN_SECRET environment variable is not set.");
-    }
-    // return jwt.sign({ user }, process.env.TOKEN_SECRET, { expiresIn: "2d" });
-    return jwt.sign({ user }, process.env.TOKEN_SECRET);
+// const createToken = (user) => {
+//   try {
+//     // Ensure TOKEN_SECRET is set in your environment variables
+//     if (!process.env.TOKEN_SECRET) {
+//       throw new Error("TOKEN_SECRET environment variable is not set.");
+//     }
+//     // return jwt.sign({ user }, process.env.TOKEN_SECRET, { expiresIn: "2d" });
+//     return jwt.sign({ id:user._id }, process.env.TOKEN_SECRET);
 
-  } catch (error) {
-    console.error("Token creation error:", error);
-    throw error; // Re-throw the error for proper handling in SignInFunction
-  }
-};
-
-const refreshToken = (user) => {
-  try {
-    // Ensure REFRESH_TOKEN_SECRET is set in your environment variables
-    if (!process.env.REFRESH_TOKEN_SECRET) {
-      throw new Error("REFRESH_TOKEN_SECRET environment variable is not set.");
-    }
-    return jwt.sign({ user }, process.env.REFRESH_TOKEN_SECRET);
-  } catch (error) {
-    console.error("Refresh Token creation error:", error);
-    throw error; // Re-throw the error for proper handling in SignInFunction
-  }
-};
+//   } catch (error) {
+//     console.error("Token creation error:", error);
+//     throw error; // Re-throw the error for proper handling in SignInFunction
+//   }
+// };
+const createToken = (user) => jwt.sign({ id: user._id }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
+const refreshToken = (user) => jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+// const refreshToken = (user) => {
+//   try {
+//     // Ensure REFRESH_TOKEN_SECRET is set in your environment variables
+//     if (!process.env.REFRESH_TOKEN_SECRET) {
+//       throw new Error("REFRESH_TOKEN_SECRET environment variable is not set.");
+//     }
+//     return jwt.sign({user}, process.env.REFRESH_TOKEN_SECRET);
+//   } catch (error) {
+//     console.error("Refresh Token creation error:", error);
+//     throw error; // Re-throw the error for proper handling in SignInFunction
+//   }
+// };
 
 export const SignUpFunction = async (req, res) => {
   try {
@@ -54,14 +55,14 @@ export const SignUpFunction = async (req, res) => {
     await user.save();
     const token = createToken(user);
     const refresh = refreshToken(user);
-    res.cookie("accessToken", token, {
+    const secureCookieOptions = {
       httpOnly: true,
-      // maxAge: 2 * 24 * 60 * 60 * 1000,
-    }); // Secure cookie for 2 days
-    res.cookie("refreshaccessToken", refresh, {
-      httpOnly: true,
-      // maxAge: 7 * 24 * 60 * 60 * 1000,
-    }); // Secure cookie for 2 days
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 2 * 24 * 60 * 60 * 1000,
+    };
+    res.cookie("accessToken", token, secureCookieOptions);
+    res.cookie("refreshaccessToken", refresh, secureCookieOptions); 
 
     return res.status(201).json({
       message: "User created successfully",
@@ -209,12 +210,11 @@ export const SignInFunction = async (req, res) => {
       return res.status(500).json({ message: "Error creating tokens" });
     }
 
-    // Secure cookie options for production
-    const secureCookieOptions = {
+   const secureCookieOptions = {
       httpOnly: true,
-      // secure: true, // Set to 'true' only in production for HTTPS
-      // maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days in milliseconds
-      // sameSite: 'strict', // Mitigate CSRF attacks (consider 'lax' for legacy browsers)
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 2 * 24 * 60 * 60 * 1000,
     };
 
     // Set access token cookie (consider HttpOnlyOnlyCookie for enhanced security)
@@ -244,6 +244,7 @@ export const SigninWithGoogle = async (req, res, next) => {
     const user = await UserSchema.findOne({ email });
     if (user) {
       // User already exists
+      console.log(user)
       const token = createToken(user);
       const refresh = refreshToken(user);
       if (!token || !refresh) {
@@ -323,7 +324,7 @@ export const Logout = async (req, res) => {
 export const UserInfo = async (req, res) => {
   try {
     const user = req.user;
-
+    console.log(user)
     if (!user) {
       return res.status(404).send("User not found!");
     }
