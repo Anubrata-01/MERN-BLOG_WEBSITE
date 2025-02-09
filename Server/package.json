@@ -5,8 +5,8 @@
   "type": "module",
  "scripts": {
   "start": "node app.js",
-  "server": "nodemon app.js",
-  "build": "cd ../Client && npm install && npm run build"
+  "server": "nodemon app.js"
+ 
 },
 
   "keywords": [],
