@@ -1,6 +1,6 @@
 import './App.css';
 import Navbar from './components/Navbar';
-import { Navigate, Outlet, RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { Navigate, Outlet, RouterProvider,createHashRouter } from 'react-router-dom';
 import Home from './page/Home';
 import About from './page/About';
 import Projects from './page/Projects';
@@ -29,7 +29,7 @@ Redirect.propTypes ={
   children:PropTypes.node.isRequired
 }
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: "/",
     element: <AppLayout />, // Use a layout component
@@ -72,15 +72,15 @@ const router = createBrowserRouter([
 ]);
 
 function AppLayout() {
-  const [userInfo,setUserInfo]=useAtom(userInfoAtom);
+  const [,setUserInfo]=useAtom(userInfoAtom);
   useEffect(()=>{
     getUserInfo(setUserInfo)
   },[setUserInfo])
-  console.log(userInfo)
+
   return (
     <div>
       <Navbar />
-      <Outlet/> {/* this is very important for routing to work */}
+      <Outlet/> 
     </div>
   );
 }
