@@ -1,6 +1,6 @@
 import './App.css';
 import Navbar from './components/Navbar';
-import { Navigate, Outlet, RouterProvider,createHashRouter } from 'react-router-dom';
+import { Navigate, Outlet, RouterProvider,createBrowserRouter,createHashRouter } from 'react-router-dom';
 import Home from './page/Home';
 import About from './page/About';
 import Projects from './page/Projects';
@@ -29,7 +29,7 @@ Redirect.propTypes ={
   children:PropTypes.node.isRequired
 }
 
-const router = createHashRouter([
+const router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />, // Use a layout component
