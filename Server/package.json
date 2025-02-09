@@ -6,7 +6,7 @@
  "scripts": {
   "start": "node app.js",
   "server": "nodemon app.js",
-  "build": "cd ../client && npm install && npm run build"
+  "build": "cd ../Client && npm install && npm run build"
 },
 
   "keywords": [],
