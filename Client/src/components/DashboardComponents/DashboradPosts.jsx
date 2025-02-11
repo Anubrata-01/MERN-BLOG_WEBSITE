@@ -35,7 +35,7 @@ console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
                     <td className="py-2">
                       {post.image ? (
                        <img
-                       src={`${import.meta.env.VITE_BACKEND_URL}${image}`} // Construct full URL
+                       src={`${post?.image}`|| post?.image} // Construct full URL
                        alt={title}
                        className="w-8 h-8 object-cover rounded"
                    />

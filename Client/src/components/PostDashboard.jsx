@@ -3,14 +3,14 @@ import { useAtom } from "jotai";
 import { userInfoAtom } from "../StoreContainer/store";
 import { fetchPostsdata } from "../Functions/handlingFunction";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const PostDashboard = () => {
   const [userInfo] = useAtom(userInfoAtom);
   const [limit, setLimit] = useState(3); // Initialize with 2 posts
   const [showMore, setShowMore] = useState(true); // Track if there are more posts to show
   const [posts,setPosts]=useState([]);
-
+  const navigate=useNavigate()
   const { data: post,isLoading } = useQuery({
     queryKey: ["postsData", userInfo?.user?.isAdmin, limit], 
     queryFn: ({ queryKey }) => {
@@ -26,6 +26,8 @@ const PostDashboard = () => {
   }, [post?.posts]);
   console.log(posts)
   const isMorePosts = post?.posts.length >= limit;
+
+
   const handleShowMore = () => {
     setLimit(prevLimit => prevLimit + 2); // Increase the limit by 2 posts
     if(!isMorePosts){
@@ -33,6 +35,10 @@ const PostDashboard = () => {
     }
   };
 
+  const handleEditBtn=(post)=>{
+    console.log(post)
+    navigate(`/createpost`,{state:post})
+  }
   return (
     <div className="p-6 bg-gray-900 text-gray-100">
       <div className="overflow-x-auto shadow-lg rounded-lg bg-gray-800 max-h-[calc(100vh-100px)] lg:max-h-screen">
@@ -76,7 +82,7 @@ const PostDashboard = () => {
                     <button className="text-red-400 hover:underline">Delete</button>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <button className="text-blue-400 hover:underline">Edit</button>
+                    <button className="text-blue-400 hover:underline" onClick={()=>handleEditBtn(post)}>Edit</button>
                   </td>
                 </tr>
               ))}
@@ -95,7 +101,7 @@ const PostDashboard = () => {
                 <p className="text-gray-300">{new Date(post.updatedAt).toLocaleDateString()}</p>
                 <Link to={`/post/${post.slug}`}>
                     <img
-                      src={`${import.meta.env.VITE_BACKEND_URL}${post?.image}`}
+                      src={`${post?.image}`|| post?.image}
                       alt={post.slug}
                       className="w-12 h-12 object-cover rounded-md"
                     />
@@ -109,7 +115,7 @@ const PostDashboard = () => {
               <p className="text-gray-300">{post.category}</p>
               <div className="flex justify-between">
                 <button className="text-red-400 hover:underline">Delete</button>
-                <button className="text-blue-400 hover:underline">Edit</button>
+                <button className="text-blue-400 hover:underline" onClick={()=>handleEditBtn(post)}>Edit</button>
               </div>
             </div>
           ))}

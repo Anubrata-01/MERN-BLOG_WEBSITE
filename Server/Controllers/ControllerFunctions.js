@@ -232,8 +232,7 @@ export const SigninWithGoogle = async (req, res, next) => {
 
       return res.status(201).json({
         message: "Signed in successfully",
-        user: rest,
-        accessToken: token,
+        user: rest
       });
     } else {
       const generatedPassword =
@@ -261,8 +260,7 @@ export const SigninWithGoogle = async (req, res, next) => {
 
       return res.status(201).json({
         message: "Signed in successfully",
-        user: rest,
-        accessToken: token,
+        user: rest
       });
     }
   } catch (error) {
@@ -290,7 +288,7 @@ export const Logout = async (req, res) => {
 export const UserInfo = async (req, res) => {
   try {
     const user = req.user;
-    console.log(user)
+    // console.log(user)
     if (!user) {
       return res.status(404).send("User not found!");
     }
@@ -448,6 +446,9 @@ export const uploadImage = async (req, res) => {
   });
 };
 
+
+// createpost function 
+
 export const createPost = async (req, res, next) => {
   console.log(req.user);
 
@@ -533,3 +534,16 @@ export const getPosts = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const editPost=async(req,res)=>{
+  try{
+    const post = await Post.findByIdAndUpdate(req.params.postId, {
+      $set: req.body,
+    }, { new: true });
+    res.status(200).json(post);
+  }catch(error){
+    console.log(error);
+    res.status(500).json({ message: "Post could not be updated" });
+  }
+}
