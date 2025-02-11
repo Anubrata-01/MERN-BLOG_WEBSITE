@@ -7,7 +7,7 @@ export default function PostCard({ post }) {
     <div className='group relative w-full border border-teal-500 hover:border-2 h-[300px] sm:h-[380px] overflow-hidden rounded-lg sm:w-auto transition-all'>
       <Link to={`/post/${post.slug}`}>
         <img
-          src={`${import.meta.env.VITE_BACKEND_URL}${post?.image}`}
+          src={`${post?.image}`}
             
           alt='post cover'
           className='h-[200px] sm:h-[280px] w-full  object-cover group-hover:h-[170px] sm:group-hover:h-[200px] transition-all duration-300 z-20'

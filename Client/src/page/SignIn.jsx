@@ -1,27 +1,25 @@
-
-import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { getUserInfo, SigninFunction } from '../Functions/handlingFunction';
-import { useAtom } from 'jotai';
-import { userInfoAtom } from '../StoreContainer/store';
-import Oauth from '../components/Oauth';
-
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { getUserInfo, SigninFunction } from "../Functions/handlingFunction";
+import { useAtom } from "jotai";
+import { userInfoAtom } from "../StoreContainer/store";
+import Oauth from "../components/Oauth";
 
 const SignIn = () => {
-  const [ ,setUserInfo]=useAtom(userInfoAtom)
+  const [, setUserInfo] = useAtom(userInfoAtom);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
- const navigate=useNavigate()
+  const navigate = useNavigate();
   const onSubmit = (data) => {
-    console.log('SignIn Data:', data);
-     SigninFunction(data,setUserInfo,navigate).then(()=>{
+    console.log("SignIn Data:", data);
+    SigninFunction(data, setUserInfo, navigate).then(() => {
       getUserInfo(setUserInfo);
-     })
-  
+    });
+
     // Add your sign-in logic here (e.g., API call)
   };
 
@@ -67,15 +65,15 @@ const SignIn = () => {
               <input
                 type="email"
                 id="email"
-                {...register('email', {
-                  required: 'Email is required',
+                {...register("email", {
+                  required: "Email is required",
                   pattern: {
                     value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                    message: 'Enter a valid email address',
+                    message: "Enter a valid email address",
                   },
                 })}
                 className={`border rounded-md w-full px-3 py-2 focus:outline-none focus:ring focus:ring-teal-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                  errors.email ? 'border-red-500' : ''
+                  errors.email ? "border-red-500" : ""
                 }`}
               />
               {errors.email && (
@@ -94,15 +92,15 @@ const SignIn = () => {
               <input
                 type="password"
                 id="password"
-                {...register('password', {
-                  required: 'Password is required',
+                {...register("password", {
+                  required: "Password is required",
                   minLength: {
                     value: 6,
-                    message: 'Password must be at least 6 characters',
+                    message: "Password must be at least 6 characters",
                   },
                 })}
                 className={`border rounded-md w-full px-3 py-2 focus:outline-none focus:ring focus:ring-teal-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                  errors.password ? 'border-red-500' : ''
+                  errors.password ? "border-red-500" : ""
                 }`}
               />
               {errors.password && (
@@ -118,14 +116,14 @@ const SignIn = () => {
               >
                 Sign In
               </button>
-              <Oauth/>
-            </div>
-            <div className="text-center mt-4">
-              <Link to="/signup" className="text-blue-500 hover:underline">
-                {`Don't`} have an account? Sign Up
-              </Link>
             </div>
           </form>
+          <Oauth />
+          <div className="text-center mt-4">
+            <Link to="/signup" className="text-blue-500 hover:underline">
+              {`Don't`} have an account? Sign Up
+            </Link>
+          </div>
         </div>
       </motion.div>
     </div>
@@ -133,4 +131,3 @@ const SignIn = () => {
 };
 
 export default SignIn;
-

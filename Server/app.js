@@ -44,12 +44,10 @@ app.use("/api/auth", router);
 // Serve uploads (for file storage)
 const uploadsPath = path.join(__dirname, "uploads");
 app.use("/uploads", express.static(uploadsPath));
-console.log("Uploads directory path:", uploadsPath);
 
 // Serve React frontend in production
 if (process.env.NODE_ENV === "production") {
   const CLIENT_BUILD_PATH = path.join(__dirname, "..", "Client", "dist");
-  console.log(`Serving static files from: ${CLIENT_BUILD_PATH}`);
 
   app.use(express.static(CLIENT_BUILD_PATH));
 

@@ -2,8 +2,6 @@ import PropTypes from "prop-types";
 
 const DashboradPosts = ({ posts }) => {
   
-console.log("Backend URL:", import.meta.env.VITE_BACKEND_URL);
-
   return (
     <div>
       <div className="bg-gray-800 p-6 rounded-lg shadow-md">
