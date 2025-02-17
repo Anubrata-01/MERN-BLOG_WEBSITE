@@ -8,7 +8,7 @@ import { errorHandler } from "../utils/error.js";
 import Post from "../Models/Post.js";
 import { query } from "express";
 dotenv.config();
-const createToken = (user) => jwt.sign({ id: user._id }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
+const createToken = (user) => jwt.sign({ id: user._id }, process.env.TOKEN_SECRET, { expiresIn: '1D' });
 // const refreshToken = (user) => jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
 

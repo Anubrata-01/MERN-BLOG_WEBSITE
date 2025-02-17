@@ -13,7 +13,7 @@ const authenticateMiddleware = async (req, res, next) => {
     const accessTokenSecret = process.env.TOKEN_SECRET;
 
     let decoded;
-    console.log(accessToken);
+
     // Attempt to verify access token
     try {
       decoded = jwt.verify(accessToken, accessTokenSecret);
