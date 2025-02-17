@@ -1,48 +1,82 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import { userInfoAtom } from "../StoreContainer/store";
 import { fetchPostsdata } from "../Functions/handlingFunction";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { DELETE_POST_URL } from "../constant/constantfile";
 
 const PostDashboard = () => {
   const [userInfo] = useAtom(userInfoAtom);
-  const [limit, setLimit] = useState(3); // Initialize with 2 posts
-  const [showMore, setShowMore] = useState(true); // Track if there are more posts to show
-  const [posts,setPosts]=useState([]);
-  const navigate=useNavigate()
-  const { data: post,isLoading } = useQuery({
-    queryKey: ["postsData", userInfo?.user?.isAdmin, limit], 
+  const [limit, setLimit] = useState(3);
+  const [showMore, setShowMore] = useState(true);
+  const [posts, setPosts] = useState([]);
+  const [message, setMessage] = useState(""); // State for success message
+  const queryClient = useQueryClient(); // React Query Client
+  const navigate = useNavigate();
+
+  const { data: post, isLoading } = useQuery({
+    queryKey: ["postsData", userInfo?.user?.isAdmin, limit],
     queryFn: ({ queryKey }) => {
-      const [, , limit] = queryKey; 
-      return fetchPostsdata(limit); // Fetch posts based on the `limit`
+      const [, , limit] = queryKey;
+      return fetchPostsdata(limit);
     },
     enabled: userInfo?.user?.isAdmin,
   });
+
   useEffect(() => {
     if (post?.posts) {
-      setPosts(post?.posts);
+      setPosts(post.posts);
     }
   }, [post?.posts]);
-  console.log(posts)
+
   const isMorePosts = post?.posts.length >= limit;
 
-
   const handleShowMore = () => {
-    setLimit(prevLimit => prevLimit + 2); // Increase the limit by 2 posts
-    if(!isMorePosts){
-        setShowMore(false)
+    setLimit((prevLimit) => prevLimit + 2);
+    if (!isMorePosts) {
+      setShowMore(false);
     }
   };
 
-  const handleEditBtn=(post)=>{
-    console.log(post)
-    navigate(`/createpost`,{state:post})
-  }
+  const handleEditBtn = (post) => {
+    navigate(`/createpost`, { state: post });
+  };
+
+  // Delete post
+  const handleDeletePost = async (post) => {
+    try {
+      const res = await fetch(`${DELETE_POST_URL}/${post._id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setMessage("Post has been deleted successfully!"); // Set success message
+        queryClient.invalidateQueries(["postsData"]); // Refetch posts after deletion
+        setTimeout(() => setMessage(""), 3000); // Hide message after 3 seconds
+      } else {
+        setMessage(data.message || "Failed to delete the post.");
+      }
+    } catch (error) {
+      setMessage("Something went wrong!",error);
+    }
+  };
+
   return (
     <div className="p-6 bg-gray-900 text-gray-100">
+      {message && (
+        <div className="bg-green-600 text-white text-center py-2 mb-4 rounded">
+          {message}
+        </div>
+      )}
+
       <div className="overflow-x-auto shadow-lg rounded-lg bg-gray-800 max-h-[calc(100vh-100px)] lg:max-h-screen">
-        {/* Container for large screens with scrolling */}
         <div className="lg:max-h-[calc(100vh-100px)] overflow-auto hidden lg:block">
           <table className="table-auto w-full text-left border-collapse">
             <thead className="bg-gray-700 text-gray-300">
@@ -63,79 +97,76 @@ const PostDashboard = () => {
                   </td>
                   <td className="px-4 py-3">
                     <Link to={`/post/${post.slug}`}>
-                    <img
-                      src={`${post?.image}`|| post?.image}
-                      alt={post.slug}
-                      className="w-12 h-12 object-cover rounded-md"
-                    />
+                      <img
+                        src={post?.image}
+                        alt={post.slug}
+                        className="w-12 h-12 object-cover rounded-md"
+                      />
                     </Link>
-                   
                   </td>
                   <td className="px-4 py-3 text-gray-100 font-medium">
-                    <Link to={`/post/${post.slug}`}>
-                    {post.slug}
-                    </Link>
-                    
+                    <Link to={`/post/${post.slug}`}>{post.slug}</Link>
                   </td>
                   <td className="px-4 py-3 text-gray-300">{post.category}</td>
                   <td className="px-4 py-3 text-center">
-                    <button className="text-red-400 hover:underline">Delete</button>
+                    <button
+                      className="text-red-400 hover:underline"
+                      onClick={() => handleDeletePost(post)}
+                    >
+                      Delete
+                    </button>
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <button className="text-blue-400 hover:underline" onClick={()=>handleEditBtn(post)}>Edit</button>
+                    <button
+                      className="text-blue-400 hover:underline"
+                      onClick={() => handleEditBtn(post)}
+                    >
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        
-        {/* For smaller devices, use card-like display for posts */}
+
+        {/* For smaller devices */}
         <div className="lg:hidden mt-4">
           {posts.map((post) => (
-            <div
-              key={post._id}
-              className="bg-gray-700 rounded-lg mb-4 p-4 flex flex-col space-y-4"
-            >
+            <div key={post._id} className="bg-gray-700 rounded-lg mb-4 p-4 flex flex-col space-y-4">
               <div className="flex justify-between">
                 <p className="text-gray-300">{new Date(post.updatedAt).toLocaleDateString()}</p>
                 <Link to={`/post/${post.slug}`}>
-                    <img
-                      src={`${post?.image}`|| post?.image}
-                      alt={post.slug}
-                      className="w-12 h-12 object-cover rounded-md"
-                    />
-                    </Link>
+                  <img
+                    src={post?.image}
+                    alt={post.slug}
+                    className="w-12 h-12 object-cover rounded-md"
+                  />
+                </Link>
               </div>
               <h3 className="text-gray-100 font-medium">
-              <Link to={`/post/${post.slug}`}>
-                    {post.slug}
-                    </Link>
+                <Link to={`/post/${post.slug}`}>{post.slug}</Link>
               </h3>
               <p className="text-gray-300">{post.category}</p>
               <div className="flex justify-between">
-                <button className="text-red-400 hover:underline">Delete</button>
-                <button className="text-blue-400 hover:underline" onClick={()=>handleEditBtn(post)}>Edit</button>
+                <button className="text-red-400 hover:underline" onClick={() => handleDeletePost(post)}>
+                  Delete
+                </button>
+                <button className="text-blue-400 hover:underline" onClick={() => handleEditBtn(post)}>
+                  Edit
+                </button>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Show more button */}
         {showMore && isMorePosts && (
-          <button
-            onClick={handleShowMore}
-            className="w-full text-teal-500 self-center text-sm py-7"
-          >
+          <button onClick={handleShowMore} className="w-full text-teal-500 self-center text-sm py-7">
             Show more
           </button>
         )}
-         {isLoading && (
-          <p className="text-gray-300 text-center py-3">Loading...</p>
-        )}
-        {!isMorePosts && (
-          <p className="text-gray-300 text-center py-3">No more posts to display.</p>
-        )}
+        {isLoading && <p className="text-gray-300 text-center py-3">Loading...</p>}
+        {!isMorePosts && <p className="text-gray-300 text-center py-3">No more posts to display.</p>}
         {post?.posts.length === 0 && <p>You have no posts yet!</p>}
       </div>
     </div>
@@ -143,4 +174,5 @@ const PostDashboard = () => {
 };
 
 export default PostDashboard;
+
 

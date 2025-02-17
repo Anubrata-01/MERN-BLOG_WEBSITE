@@ -308,6 +308,9 @@ export const UserInfo = async (req, res) => {
   }
 };
 
+
+// getuser functionality
+
 export const getUsers = async (req, res, next) => {
   if (!req.user.isAdmin) {
     return next(errorHandler(403, "You are not allowed to see all users"));
@@ -350,6 +353,9 @@ export const getUsers = async (req, res, next) => {
     next(error);
   }
 };
+
+// *updateprofile* function
+
 export const updateUserProfile = async (req, res, next) => {
   const { username, email, password,profilePicture } = req.body;
   // Validation
@@ -392,6 +398,9 @@ export const updateUserProfile = async (req, res, next) => {
   }
 };
 
+
+// deleteUser 
+
 export const deleteUser = async (req, res, next) => {
   if (!req.user.isAdmin && req.user.id !== req.params.userId) {
     return next(errorHandler(403, "You are not allowed to delete this user"));
@@ -404,47 +413,52 @@ export const deleteUser = async (req, res, next) => {
   }
 };
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    cb(null, `${Date.now()}_${req.user._id}${path.extname(file.originalname)}`);
-  },
-});
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, "uploads/");
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, `${Date.now()}_${req.user._id}${path.extname(file.originalname)}`);
+//   },
+// });
 
-export const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: function (req, file, cb) {
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-      return cb(new Error("Only image files are allowed!"), false);
-    }
-    cb(null, true);
-  },
-}).single("image");
 
-export const uploadImage = async (req, res) => {
-  upload(req, res, function (err) {
-    if (err instanceof multer.MulterError) {
-      return res.status(400).json({ error: err.message });
-    } else if (err) {
-      return res
-        .status(500)
-        .json({ error: "An error occurred while uploading the file." });
-    }
+// // Multer configuration
+// export const upload = multer({
+//   storage: storage,
+//   limits: { fileSize: 5 * 1024 * 1024 },
+//   fileFilter: function (req, file, cb) {
+//     if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+//       return cb(new Error("Only image files are allowed!"), false);
+//     }
+//     cb(null, true);
+//   },
+// }).single("image");
 
-    if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded." });
-    }
 
-    res.status(200).json({
-      message: "File uploaded successfully",
-      filename: req.file.filename,
-      path: `/uploads/${req.file.filename}`, // This is the path where the image can be accessed
-    });
-  });
-};
+// Upload image function
+
+// export const uploadImage = async (req, res) => {
+//   upload(req, res, function (err) {
+//     if (err instanceof multer.MulterError) {
+//       return res.status(400).json({ error: err.message });
+//     } else if (err) {
+//       return res
+//         .status(500)
+//         .json({ error: "An error occurred while uploading the file." });
+//     }
+
+//     if (!req.file) {
+//       return res.status(400).json({ error: "No file uploaded." });
+//     }
+
+//     res.status(200).json({
+//       message: "File uploaded successfully",
+//       filename: req.file.filename,
+//       path: `/uploads/${req.file.filename}`, // This is the path where the image can be accessed
+//     });
+//   });
+// };
 
 
 // createpost function 
@@ -493,6 +507,8 @@ export const createPost = async (req, res, next) => {
   }
 };
 
+
+// getpost functionality
 export const getPosts = async (req, res, next) => {
   try {
     const startIndex = parseInt(req, query.startIndex) || 0;
@@ -536,6 +552,10 @@ export const getPosts = async (req, res, next) => {
 };
 
 
+
+// editpost functionality
+
+
 export const editPost=async(req,res)=>{
   try{
     const post = await Post.findByIdAndUpdate(req.params.postId, {
@@ -547,3 +567,23 @@ export const editPost=async(req,res)=>{
     res.status(500).json({ message: "Post could not be updated" });
   }
 }
+
+
+export const deletePost = async (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return next(errorHandler(403, "You are not allowed to delete this post"));
+  }
+
+  try {
+    const post = await Post.findById(req.params.postId);
+
+    if (!post) {
+      return next(errorHandler(404, "Post not found"));
+    }
+
+    await Post.findByIdAndDelete(req.params.postId);
+    res.status(200).json({ message: "Post has been deleted successfully" });
+  } catch (error) {
+    next(errorHandler(500, "Something went wrong while deleting the post"));
+  }
+};
