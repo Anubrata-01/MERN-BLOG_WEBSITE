@@ -1,8 +1,6 @@
 import UserSchema from "../Models/Users.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import multer from "multer";
-import path from "path";
 import dotenv from "dotenv";
 import { errorHandler } from "../utils/error.js";
 import Post from "../Models/Post.js";
@@ -402,7 +400,7 @@ export const updateUserProfile = async (req, res, next) => {
 // deleteUser 
 
 export const deleteUser = async (req, res, next) => {
-  if (!req.user.isAdmin && req.user.id !== req.params.userId) {
+  if (!req.user.isAdmin) {
     return next(errorHandler(403, "You are not allowed to delete this user"));
   }
   try {
