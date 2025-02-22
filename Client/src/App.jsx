@@ -17,6 +17,7 @@ import SignIn from './page/SignIn.jsx';
 import SignUp from './page/SignUp.jsx';
 import { useEffect } from 'react';
 import { getUserInfo } from './Functions/handlingFunction.js';
+import Layout from './page/Layout.jsx';
 
 const Redirect=({children})=>{
    const [userInfo] = useAtom(userInfoAtom);
@@ -37,7 +38,7 @@ const router = createHashRouter([
     children: [
       {
         path: "/",
-        element: <Home/>,
+        element: <Layout><Home/></Layout>,
       },
       {
         path: "/about",
