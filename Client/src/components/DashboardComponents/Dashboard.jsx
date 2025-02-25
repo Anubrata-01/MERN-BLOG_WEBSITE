@@ -71,7 +71,7 @@ const Dashboard = () => {
   return (
     <div
       className={`h-auto md:min-h-screen ${
-        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-300 text-gray-900"
       } p-6 space-y-8`}
     >
       {/* Stats Section */}

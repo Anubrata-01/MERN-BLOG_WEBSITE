@@ -28,11 +28,13 @@ const PostPage = () => {
     queryKey: ["recentPosts", 4, data?.posts?.length],
     queryFn: ({ queryKey }) => {
       const [, limit, startIndex] = queryKey;
+      console.log(startIndex);
       return fetchPostsdata(limit, startIndex);
     },
     enabled: !!postSlug,
   });
 
+  console.log(post)
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-800">
@@ -53,7 +55,7 @@ const PostPage = () => {
     return <div className="text-center">No blog found for the given slug.</div>;
   }
 
-  const { title, category, image, content } = data.posts[0];
+  const { title, category, image, content,_id } = data.posts[0];
 
   return (
     <div
@@ -101,8 +103,8 @@ const PostPage = () => {
       </div>
 
       {/* Comment Section */}
-      <div className="p-6 max-w-3xl mx-auto">
-        <CommentSection />
+      <div className="p-4 max-w-3xl mx-auto">
+        <CommentSection postId={_id}/>
       </div>
 
       {/* Recent Posts Section */}

@@ -1,5 +1,6 @@
 import {
   DELETE_USER_PROFILE_URL,
+  FETCH_COMMENTS_URL,
   FETCH_POSTS_URL,
   FETCH_USER_URL,
   INFO_URL,
@@ -193,3 +194,21 @@ export const fetchPostsdataBySlug = async (postSlug) => {
     console.error("Error fetching user info:", error);
   }
 };
+
+
+export const fetchAllComments=async()=>{
+  try{
+    const response=await fetch(`${FETCH_COMMENTS_URL}`,{
+      method:"GET",
+      headers:{"Content-Type":"application/json"},
+      credentials:"include"
+    });
+    const data=await response.json();
+    if(response.ok){
+      console.log(data);
+      return data;
+    }
+  }catch(error){
+    console.error("Error fetching user info:",error);
+  }
+}

@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { errorHandler } from "../utils/error.js";
 import Post from "../Models/Post.js";
 import { query } from "express";
+import Comment from "../Models/Comments.js";
 dotenv.config();
 const createToken = (user) => jwt.sign({ id: user._id }, process.env.TOKEN_SECRET, { expiresIn: '1D' });
 // const refreshToken = (user) => jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
@@ -585,3 +586,43 @@ export const deletePost = async (req, res, next) => {
     next(errorHandler(500, "Something went wrong while deleting the post"));
   }
 };
+
+
+// Create Comments
+
+export const createComment = async (req, res) => {
+  try {
+    const { postId, content, userId } = req.body;
+    if (!postId || !content || !userId) {
+      return res.status(400).json({ message: "Please provide all required fields" });
+    }
+    const commentedUser=await UserSchema.findById(userId);
+    console.log(commentedUser);
+    const newComment = new Comment({ postId, content, user:commentedUser });
+    await newComment.save();
+    res.status(201).json({ message: "Comment created successfully", comment: newComment });
+  } catch (error) {
+    console.error("Create comment error:", error);
+    res.status(500).json({ message: "Comment creation failed" });
+  }
+}
+
+export const getComments = async (req, res) => {
+  try {
+    const comments = await Comment.find({ postId: req.params.postId });
+    res.status(200).json(comments);
+  } catch (error) {
+    console.error("Get comments error:", error);
+    res.status(500).json({ message: "Failed to fetch comments" });
+  }
+}
+
+export const deleteComment = async (req, res) => {
+  try {
+    await Comment.findByIdAndDelete(req.params.commentId);
+    res.status(200).json({ message: "Comment deleted successfully" });
+  } catch (error) {
+    console.error("Delete comment error:", error);
+    res.status(500).json({ message: "Failed to delete comment" });
+  }
+}
