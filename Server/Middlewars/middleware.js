@@ -9,7 +9,6 @@ const authenticateMiddleware = async (req, res, next) => {
     if (!accessToken) {
       return res.status(401).json({ error: "Access token is missing." });
     }
-  console.log(accessToken)
     const accessTokenSecret = process.env.TOKEN_SECRET;
 
     let decoded;

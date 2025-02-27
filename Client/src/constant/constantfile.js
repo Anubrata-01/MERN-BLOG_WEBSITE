@@ -16,5 +16,6 @@ export const FETCH_POSTS_URL=`${AUTH_ROUTES}/getposts`
 export const UPDATE_PROFILE_URL=`${AUTH_ROUTES}/update/`
 export const DELETE_USER_PROFILE_URL=`${AUTH_ROUTES}/delete/`
 export const CREATE_COMMENT_URL=`${AUTH_ROUTES}/createcomment`
+export const REPLY_COMMENT_URL=`${AUTH_ROUTES}/replycomment/`
 export const FETCH_COMMENTS_URL=`${AUTH_ROUTES}/getcomments/`
 export const DELETE_COMMENT_URL=`${AUTH_ROUTES}/deletecomment`

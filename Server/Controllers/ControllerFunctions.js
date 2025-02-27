@@ -1,6 +1,7 @@
 import UserSchema from "../Models/Users.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { errorHandler } from "../utils/error.js";
 import Post from "../Models/Post.js";
@@ -626,3 +627,49 @@ export const deleteComment = async (req, res) => {
     res.status(500).json({ message: "Failed to delete comment" });
   }
 }
+
+
+// Reply to a comment
+export const createCommentReply = async (req, res) => {
+  try {
+      const { postId, content, userId } = req.body;
+      const { parentId } = req.params;
+
+      if (!postId || !content || !userId) {
+          return res.status(400).json({ message: "Please provide all required fields" });
+      }
+
+      // Validate user
+      const commentedUser = await UserSchema.findById(userId);
+      if (!commentedUser) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      // Validate parent comment
+      const parentComment = await Comment.findById(parentId);
+      if (!parentComment) {
+          return res.status(404).json({ message: "Parent comment not found" });
+      }
+
+      if (!Array.isArray(parentComment.replies)) {
+          parentComment.replies = [];
+      }
+
+      // Correct Reply Object
+      const reply = {
+          userId: userId, 
+          content: content,
+          createdAt: new Date(),
+          user:commentedUser
+      };
+
+      parentComment.replies.push(reply);
+      await parentComment.save();
+
+      res.status(201).json({ message: "Reply added successfully", reply });
+  } catch (error) {
+      console.error("Create comment error:", error);
+      res.status(500).json({ message: "Failed to add reply to comment", error: error.message });
+  }
+};
+

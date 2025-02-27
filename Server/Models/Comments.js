@@ -1,5 +1,15 @@
 import mongoose from "mongoose";
 
+
+const replySchema = new mongoose.Schema(
+    {
+      userId: { type: String,  required: true },
+      user: { type: Object, required: true },
+      content: { type: String, required: true },
+      createdAt: { type: Date, default: Date.now },
+    },
+   
+  ); 
 const commentSchema = new mongoose.Schema(
     {
         postId: {
@@ -8,8 +18,8 @@ const commentSchema = new mongoose.Schema(
         userId: {
             type: String,
         },
-        user:{
-            type: Object,
+        user: {
+            type: Object,  // Consider refining this with a more specific schema if needed
         },
         content: {
             type: String,
@@ -19,14 +29,10 @@ const commentSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
-        replies: {
-            type: Number,
-            default: 0,
-        },
+        replies:[replySchema],
     },
     { timestamps: true }
-    
 );
 
- const Comment = mongoose.model("Comment", commentSchema);
- export default Comment;
+const Comment = mongoose.model("Comment", commentSchema);
+export default Comment;
