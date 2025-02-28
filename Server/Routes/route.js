@@ -1,5 +1,5 @@
 import Router from 'express';
-import { createPost, deleteUser, editPost, getPosts, getUsers, Logout, SignInFunction, SigninWithGoogle, SignUpFunction, updateUserProfile, UserInfo,deletePost, createComment, getComments, deleteComment, createCommentReply } from '../Controllers/ControllerFunctions.js';
+import { createPost, deleteUser, editPost, getPosts, getUsers, Logout, SignInFunction, SigninWithGoogle, SignUpFunction, updateUserProfile, UserInfo,deletePost, createComment, getComments, deleteComment, createCommentReply, deleteCommentReply } from '../Controllers/ControllerFunctions.js';
 import authenticateMiddleware from '../Middlewars/middleware.js';
 const router=Router();
 router.post('/signup',SignUpFunction);
@@ -18,4 +18,5 @@ router.post('/createcomment',authenticateMiddleware,createComment);
 router.post('/replycomment/:parentId',authenticateMiddleware,createCommentReply);
 router.get('/getcomments/:postId',getComments);
 router.delete('/deletecomment/:commentId',authenticateMiddleware,deleteComment);
+router.delete("/comments/:commentId/replies/:replyId", deleteCommentReply);
 export default router;

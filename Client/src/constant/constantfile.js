@@ -19,3 +19,4 @@ export const CREATE_COMMENT_URL=`${AUTH_ROUTES}/createcomment`
 export const REPLY_COMMENT_URL=`${AUTH_ROUTES}/replycomment/`
 export const FETCH_COMMENTS_URL=`${AUTH_ROUTES}/getcomments/`
 export const DELETE_COMMENT_URL=`${AUTH_ROUTES}/deletecomment`
+// export const DELETE_COMMENT_REPLY_URL=`${AUTH_ROUTES}/comments/`

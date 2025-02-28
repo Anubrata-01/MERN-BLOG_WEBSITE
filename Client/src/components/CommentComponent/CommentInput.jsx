@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PropTypes from "prop-types"; // Importing PropTypes
 
-const CommentInput = ({ onAddComment, userInfo, darkMode }) => {
+const CommentInput = ({ onAddComment, userInfo, darkMode,parentId }) => {
   const [input, setInput] = useState("");
   const [showButtons, setShowButtons] = useState(false);
 
@@ -11,7 +11,7 @@ const CommentInput = ({ onAddComment, userInfo, darkMode }) => {
       return;
     }
     if (input.trim()) {
-      onAddComment(input);
+      onAddComment(input, parentId);
       setInput("");
       setShowButtons(false);
     }

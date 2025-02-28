@@ -8,6 +8,7 @@ const CommentItem = ({
   onReply, 
   onDelete, 
   replyToCommentId, 
+  handleDeleteCommentReply,
   handleReplyToComment, 
   darkMode 
 }) => {
@@ -71,22 +72,25 @@ const CommentItem = ({
         </div>
       )}
 
-      {showReplies && comment.replies?.length > 0 && (
-        <div className="ml-6 border-l pl-3">
-          {comment.replies.map((reply) => (
-            <CommentItem
-              key={reply._id}
-              comment={reply}
-              userInfo={userInfo}
-              onReply={onReply}
-              onDelete={onDelete}
-              replyToCommentId={replyToCommentId}
-              handleReplyToComment={handleReplyToComment}
-              darkMode={darkMode}
-            />
-          ))}
-        </div>
-      )}
+     {showReplies && comment.replies?.length > 0 && (
+      <div className="ml-6 border-l pl-3">
+        {comment.replies.map((reply) => (
+          <CommentItem
+            key={reply._id}
+            comment={reply}
+            userInfo={userInfo}
+            onReply={onReply}
+            // onDelete={onDelete}
+            // handleDeleteCommentReply={handleDeleteCommentReply}
+            onDelete={() => handleDeleteCommentReply(comment._id, reply._id)} // ✅ Corrected order
+            replyToCommentId={replyToCommentId}
+            handleReplyToComment={handleReplyToComment}
+            darkMode={darkMode}
+          />
+        ))}
+      </div>
+    )}
+    
     </div>
   );
 };

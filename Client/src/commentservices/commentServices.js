@@ -5,6 +5,7 @@ import {
   FETCH_COMMENTS_URL,
   DELETE_COMMENT_URL,
   REPLY_COMMENT_URL,
+  AUTH_ROUTES,
 } from "../constant/constantfile";
 
 export const fetchComments = async (postId) => {
@@ -33,3 +34,9 @@ export const replyToComment = async (newCommentReply, parentId) => {
   });
   return response.data;
 };
+
+export const deleteCommentReply = async (commentId, replyId) => {
+  await axios.delete(`${AUTH_ROUTES}/comments/${commentId}/replies/${replyId}`, {
+    withCredentials: true,
+  });
+}

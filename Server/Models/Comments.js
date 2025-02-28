@@ -6,9 +6,14 @@ const replySchema = new mongoose.Schema(
       userId: { type: String,  required: true },
       user: { type: Object, required: true },
       content: { type: String, required: true },
+      likes: {
+        type: Number,
+        default: 0,
+    },
+    replies: [{ type: Object, ref: "Reply" }],
       createdAt: { type: Date, default: Date.now },
     },
-   
+    { timestamps: true, _id: true }
   ); 
 const commentSchema = new mongoose.Schema(
     {

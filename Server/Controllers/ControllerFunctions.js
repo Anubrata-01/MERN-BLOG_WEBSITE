@@ -630,46 +630,130 @@ export const deleteComment = async (req, res) => {
 
 
 // Reply to a comment
+
+
 export const createCommentReply = async (req, res) => {
   try {
-      const { postId, content, userId } = req.body;
-      const { parentId } = req.params;
+    const { postId, content, userId } = req.body;
+    const { parentId } = req.params;
 
-      if (!postId || !content || !userId) {
-          return res.status(400).json({ message: "Please provide all required fields" });
+    if (!postId || !content || !userId) {
+      return res.status(400).json({ message: "Please provide all required fields" });
+    }
+
+   
+    if (!mongoose.Types.ObjectId.isValid(parentId)) {
+      return res.status(400).json({ message: "Invalid parentId format" });
+    }
+
+    // Validate user
+    const commentedUser = await UserSchema.findById(userId);
+    if (!commentedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+   
+    let parentComment = await Comment.aggregate([
+      { $match: { $or: [{ _id: new mongoose.Types.ObjectId(parentId) }, { "replies._id": new mongoose.Types.ObjectId(parentId) }] } },
+    ]);
+
+    if (parentComment.length === 0) {
+      return res.status(404).json({ message: "Parent comment not found" });
+    }
+
+    parentComment = await Comment.findById(parentComment[0]._id);
+
+   
+    const newReply = {
+      _id: new mongoose.Types.ObjectId(),
+      userId: userId,
+      content: content,
+      createdAt: new Date(),
+      user: {
+        _id: commentedUser._id,
+        username: commentedUser.username,
+        profilePicture: commentedUser.profilePicture,
+        email: commentedUser.email,
+      },
+      replies: [],
+    };
+
+    const addReplyToNested = (repliesArray, parentId, newReply) => {
+      for (let reply of repliesArray) {
+        if (reply._id.toString() === parentId) {
+          reply.replies.push(newReply);
+          return true;
+        }
+      
+        if (addReplyToNested(reply.replies, parentId, newReply)) {
+          return true;
+        }
       }
+      return false;
+    };
 
-      // Validate user
-      const commentedUser = await UserSchema.findById(userId);
-      if (!commentedUser) {
-          return res.status(404).json({ message: "User not found" });
+    
+    if (parentComment._id.toString() === parentId) {
+      parentComment.replies.push(newReply);
+    } else {
+
+      if (!addReplyToNested(parentComment.replies, parentId, newReply)) {
+        return res.status(404).json({ message: "Parent reply not found" });
       }
+    }
 
-      // Validate parent comment
-      const parentComment = await Comment.findById(parentId);
-      if (!parentComment) {
-          return res.status(404).json({ message: "Parent comment not found" });
-      }
+    await parentComment.save();
 
-      if (!Array.isArray(parentComment.replies)) {
-          parentComment.replies = [];
-      }
-
-      // Correct Reply Object
-      const reply = {
-          userId: userId, 
-          content: content,
-          createdAt: new Date(),
-          user:commentedUser
-      };
-
-      parentComment.replies.push(reply);
-      await parentComment.save();
-
-      res.status(201).json({ message: "Reply added successfully", reply });
+    res.status(201).json({ message: "Reply added successfully", reply: newReply });
   } catch (error) {
-      console.error("Create comment error:", error);
-      res.status(500).json({ message: "Failed to add reply to comment", error: error.message });
+    console.error("Create comment error:", error);
+    res.status(500).json({ message: "Failed to add reply to comment", error: error.message });
   }
 };
+
+
+export const deleteCommentReply = async (req, res) => {
+  try {
+    const { commentId, replyId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(commentId) || !mongoose.Types.ObjectId.isValid(replyId)) {
+      return res.status(400).json({ message: "Invalid commentId or replyId format" });
+    }
+
+    let comment = await Comment.aggregate([
+      { $match: { "replies._id": new mongoose.Types.ObjectId(replyId) } },
+    ]);
+
+    if (comment.length === 0) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    comment = await Comment.findById(comment[0]._id);
+
+    const deleteReplyFromNested = (repliesArray, replyId) => {
+      for (let reply of repliesArray) {
+        if (reply._id.toString() === replyId) {
+          repliesArray.pull({ _id: replyId });
+          return true;
+        }
+        if (deleteReplyFromNested(reply.replies, replyId)) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    if (!deleteReplyFromNested(comment.replies, replyId)) {
+      return res.status(404).json({ message: "Reply not found" });
+    }
+
+    await comment.save();
+
+    res.status(200).json({ message: "Reply deleted successfully" });
+  } catch (error) {
+    console.error("Delete reply error:", error);
+    res.status(500).json({ message: "Failed to delete reply", error: error.message });
+  }
+}
+
+
 

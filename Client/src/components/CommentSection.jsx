@@ -156,7 +156,7 @@ import { useAtom } from "jotai";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { darkModeAtom, userInfoAtom } from "../StoreContainer/store";
 
-import { addComment, deleteComment, fetchComments, replyToComment } from "../commentservices/commentServices";
+import { addComment, deleteComment, deleteCommentReply, fetchComments, replyToComment } from "../commentservices/commentServices";
 import CommentInput from "./CommentComponent/CommentInput";
 import CommentList from "./CommentComponent/CommentList";
 
@@ -192,12 +192,17 @@ const CommentSection = ({ postId }) => {
     },
   });
   
+  const deleteCommentReplyMutation = useMutation({
+    mutationFn: ({ commentId, replyId }) => deleteCommentReply(commentId, replyId),
+    onSuccess: () => queryClient.invalidateQueries(["comments"]),
+  })
 
   const handleAddComment = (input, parentId = null) => {
     const newComment = { postId, content: input, userId: userInfo?.user?._id, parentId };
     addCommentMutation.mutate(newComment);
   };
   const handleReplyComment = (commentId) => {
+    console.log(commentId);
         setReplyToCommentId(replyToCommentId === commentId ? null : commentId);
       }
   const handleReplyToComment = (input, parentId) => {
@@ -208,7 +213,9 @@ const CommentSection = ({ postId }) => {
   const handleDeleteComment = (commentId) => {
     deleteCommentMutation.mutate(commentId);
   };
-
+ const handleDeleteCommentReply = (commentId, replyId) =>{
+    deleteCommentReplyMutation.mutate({commentId, replyId});
+ }
   return (
     <div className={`max-w-2xl mx-auto p-4 rounded-lg shadow-md ${darkMode ? "bg-gray-800 text-white" : "bg-white text-black"}`}>
       <h2 className="text-lg font-semibold mb-4">Comments</h2>
@@ -222,6 +229,7 @@ const CommentSection = ({ postId }) => {
           onReply={handleReplyComment}
           onDelete={handleDeleteComment}
           replyToCommentId={replyToCommentId}
+          handleDeleteCommentReply={handleDeleteCommentReply}
           handleAddComment={handleAddComment}
           handleReplyToComment={handleReplyToComment}
           darkMode={darkMode}
