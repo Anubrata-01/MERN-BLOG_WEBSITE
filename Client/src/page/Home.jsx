@@ -10,90 +10,58 @@ import PostCard from "../components/PostCard";
 const Home = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [limit, setLimit] = useState(4);
-  const [userInfo] = useAtom(userInfoAtom);
-  const [posts, setPosts] = useState([]);
   const [showMore, setShowMore] = useState(true);
-  const [darkMode] = useAtom(darkModeAtom); // Using Jotai Atom
+  const [darkMode] = useAtom(darkModeAtom);
+  const [userInfo] = useAtom(userInfoAtom);
 
-  const { data: post, isLoading, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["recentPosts", limit],
-    queryFn: ({ queryKey }) => {
-      const [, limit] = queryKey;
-      return fetchPostsdata(limit);
-    },
-    enabled: userInfo?.user?.isAdmin,
+    queryFn: () => fetchPostsdata(limit),
+    staleTime: 5000, 
+    cacheTime: 60000, 
   });
 
-  const isMorePosts = post?.posts.length >= limit;
+  useEffect(() => {
+    const intervalId = setInterval(() => setCurrentDate(new Date()), 1000);
+    return () => clearInterval(intervalId);
+  }, []);
+
   const handleShowMore = () => {
-    setLimit((prevLimit) => prevLimit + 2);
-    if (!isMorePosts) {
+    if (data?.posts.length >= limit) {
+      setLimit((prev) => prev + 2);
+    } else {
       setShowMore(false);
     }
   };
 
-  useEffect(() => {
-    if (post?.posts) {
-      setPosts(post?.posts);
-    }
-  }, [post?.posts, limit]);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentDate(new Date());
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const formatDate = (date) => {
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    };
-    return date.toLocaleDateString("en-US", options);
-  };
+  const formatDate = (date) =>
+    date.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
   return (
-    <div
-      className={`min-h-screen py-20 px-6 sm:px-12 lg:px-24 flex flex-col justify-center items-center 
-        ${darkMode ? "bg-gray-900 text-white" : "bg-orange-100 text-gray-900"}`}
-    >
+    <div className={`min-h-screen py-20 px-6 sm:px-12 lg:px-24 flex flex-col justify-center items-center 
+        ${darkMode ? "bg-gray-900 text-white" : "bg-orange-100 text-gray-900"}`}>
       <div className="max-w-4xl w-full text-center">
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6">
-          Welcome to{" "}
-          <span className={`${darkMode ? "text-indigo-400" : "text-orange-600"}`}>
-            AbcBlog
-          </span>
+          Welcome to <span className={darkMode ? "text-indigo-400" : "text-orange-600"}>AbcBlog</span>
         </h1>
 
         <div className="text-2xl md:text-3xl font-medium mb-8">
           <TypeAnimation
-            sequence={[
-              "Sharing Knowledge",
-              1000,
-              "Inspiring Creativity",
-              1000,
-              "Exploring New Ideas",
-              1000,
-            ]}
+            sequence={["Sharing Knowledge", 1000, "Inspiring Creativity", 1000, "Exploring New Ideas", 1000]}
             wrapper="span"
             repeat={Infinity}
           />
         </div>
 
         <p className="text-lg md:text-xl mb-12 leading-relaxed">
-          A space for thoughts, experiences, and discoveries. Join me on this
-          journey of learning and growth.
+          A space for thoughts, experiences, and discoveries. Join me on this journey of learning and growth.
         </p>
 
         <div className="flex space-x-4 justify-center">
           <Link
             to="/projects"
-            className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm transition-all 
-              ${darkMode ? "bg-indigo-600 hover:bg-indigo-700" : "bg-orange-500 hover:bg-orange-600"} 
-              text-white`}
+            className={`inline-flex items-center px-6 py-3 text-base font-medium rounded-md shadow-sm transition-all 
+              ${darkMode ? "bg-indigo-600 hover:bg-indigo-700" : "bg-orange-500 hover:bg-orange-600"} text-white`}
           >
             View Projects
           </Link>
@@ -110,17 +78,16 @@ const Home = () => {
 
         <div>
           <h1 className="text-xl font-extrabold mb-10 mt-10">Recent Posts</h1>
-          <div
-            className={`p-10 rounded-md grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto transition-all 
-              ${darkMode ? "bg-gray-800 text-gray-100" : "bg-orange-200 text-gray-800"}`}
-          >
-            {posts.length > 0 ? (
-              posts.map((post) => (
-                <div
-                  key={post?.slug}
-                  className={`cursor-pointer p-6 rounded-lg shadow-md transition-all 
-                    ${darkMode ? "bg-gray-700" : "bg-gray-100"}`}
-                >
+          <div className={`p-10 rounded-md grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto transition-all 
+              ${darkMode ? "bg-gray-800 text-gray-100" : "bg-orange-200 text-gray-800"}`}>
+            {isLoading ? (
+              <p className="text-center py-3">Loading...</p>
+            ) : isError ? (
+              <p className="text-red-500 text-center py-3">An error occurred!</p>
+            ) : data?.posts.length > 0 ? (
+              data.posts.map((post) => (
+                <div key={post?.slug} className={`cursor-pointer p-6 rounded-lg shadow-md transition-all 
+                    ${darkMode ? "bg-gray-700" : "bg-gray-100"}`}>
                   <PostCard post={post} />
                 </div>
               ))
@@ -130,19 +97,15 @@ const Home = () => {
           </div>
         </div>
 
-        {showMore && isMorePosts && (
-          <button
-            onClick={handleShowMore}
-            className="w-full text-lg py-7 transition-all"
-          >
+        {showMore && data?.posts.length >= limit && (
+          <button onClick={handleShowMore} className="w-full text-lg py-7 transition-all">
             Show more
           </button>
         )}
-        {isLoading && <p className="text-center py-3">Loading...</p>}
-        {isError && <p className="text-red-500 text-center py-3">An error occurred!</p>}
       </div>
     </div>
   );
 };
 
 export default Home;
+

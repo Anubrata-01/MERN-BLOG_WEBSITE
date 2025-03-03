@@ -170,7 +170,7 @@ export const fetchPostsdata = async (limit, startIndex) => {
     );
     const data = await response.json();
     if (response.ok) {
-      console.log(data);
+      // console.log(data);
       return data;
     }
   } catch (error) {
