@@ -2,14 +2,13 @@ import { FaUserFriends, FaComments, FaClipboardList } from "react-icons/fa";
 import DashboardUser from "./DashboardUser";
 import DashboardComments from "./DashboardComments";
 import DashboradPosts from "./DashboradPosts";
-import { userInfoAtom,  darkModeAtom } from "../../StoreContainer/store.js";
+import { userInfoAtom } from "../../StoreContainer/store.js";
 import { useAtom } from "jotai";
 import { useQuery } from "@tanstack/react-query";
 import { fetchPostsdata, fetchUsersData } from "../../Functions/handlingFunction.js";
 
 const Dashboard = () => {
   const [userInfo] = useAtom(userInfoAtom);
-  const [darkMode] = useAtom(darkModeAtom); // Using dark mode state
   const limit = 3;
 
   const { data, isLoading, isError } = useQuery({
@@ -69,19 +68,13 @@ const Dashboard = () => {
   if (isError) return <div className="text-center text-red-500">Error fetching data</div>;
 
   return (
-    <div
-      className={`h-auto md:min-h-screen ${
-        darkMode ? "bg-gray-900 text-white" : "bg-gray-300 text-gray-900"
-      } p-6 space-y-8`}
-    >
+    <div className="h-auto md:min-h-screen bg-gray-700 text-gray-900 p-6 space-y-8">
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, index) => (
           <div
             key={index}
-            className={`flex items-center justify-between p-6 rounded-lg shadow-md ${
-              darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
-            }`}
+            className="flex items-center justify-between p-6 rounded-lg shadow-md bg-slate-600 text-white"
           >
             <div>
               <h3 className="text-sm text-gray-400">{stat.title}</h3>
@@ -89,9 +82,7 @@ const Dashboard = () => {
               <p className="text-sm text-green-400">{stat.change}</p>
               <p className="text-xs text-gray-500">{stat.description}</p>
             </div>
-            <div
-              className={`flex items-center justify-center w-12 h-12 rounded-full ${stat.bgColor}`}
-            >
+            <div className={`flex items-center justify-center w-12 h-12 rounded-full ${stat.bgColor}`}>
               {stat.icon}
             </div>
           </div>
@@ -114,4 +105,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
 

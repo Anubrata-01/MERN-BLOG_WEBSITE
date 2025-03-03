@@ -18,10 +18,7 @@ const Navbar = () => {
     getUserInfo(setUserInfo);
   }, [setUserInfo]);
 
-  // useEffect(() => {
-  //   localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-  //   document.documentElement.classList.toggle("dark", isDarkMode);
-  // }, [isDarkMode]);
+  
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
   const toggleProfileMenu = () => setIsProfileMenuOpen(!isProfileMenuOpen);

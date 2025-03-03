@@ -1,19 +1,22 @@
 import { useState } from "react";
 import PropTypes from "prop-types"; // Importing PropTypes
 
-const CommentInput = ({ onAddComment, userInfo, darkMode,parentId }) => {
+const CommentInput = ({ onAddComment, userInfo, darkMode, parentId }) => {
   const [input, setInput] = useState("");
   const [showButtons, setShowButtons] = useState(false);
-
+  const [error, setError] = useState(""); // State for error message
+ console.log(userInfo)
   const handleAddComment = () => {
-    if (!userInfo) {
-      alert("Please Login to comment");
+    if (!userInfo?.user) {
+      setError("You must be logged in to reply.");
       return;
     }
+
     if (input.trim()) {
       onAddComment(input, parentId);
       setInput("");
       setShowButtons(false);
+      setError(""); // Clear error on successful comment
     }
   };
 
@@ -51,15 +54,20 @@ const CommentInput = ({ onAddComment, userInfo, darkMode,parentId }) => {
           }}
           className={`flex-1 p-2 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-500 bg-transparent w-full ${
             darkMode ? "text-white" : "text-black"
-          }`}
+          } ${!userInfo ? "opacity-50 cursor-not-allowed" : ""}`} // Disable input if not logged in
+          disabled={!userInfo?.user}
         />
+
+        {/* Error Message */}
+        {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
 
         {/* Action Buttons */}
         {showButtons && (
-          <div className=" mt-2 flex justify-end gap-2">
+          <div className="mt-2 flex justify-end gap-2">
             <button
               onClick={handleAddComment}
-              className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 keep-visible"
+              className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 keep-visible disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!userInfo?.user} // Disable button if not logged in
             >
               Reply
             </button>
@@ -67,6 +75,7 @@ const CommentInput = ({ onAddComment, userInfo, darkMode,parentId }) => {
               onClick={() => {
                 setInput("");
                 setShowButtons(false);
+                setError(""); // Clear error when canceling
               }}
               className="bg-gray-400 text-white py-2 px-4 rounded-md hover:bg-gray-500 keep-visible"
             >
@@ -88,14 +97,17 @@ CommentInput.propTypes = {
       username: PropTypes.string,
       profilePicture: PropTypes.string,
     }),
-  }), // Object containing user info
-  darkMode: PropTypes.bool, // Boolean flag for dark mode
+  }), 
+  darkMode: PropTypes.bool,
+  error: PropTypes.string,
 };
 
 // **Default Props (Optional)**
 CommentInput.defaultProps = {
-  userInfo: null, // Default to null if no user is logged in
+  userInfo: {}, // Default to null if no user is logged in
   darkMode: false, // Default to light mode
+ 
 };
 
 export default CommentInput;
+

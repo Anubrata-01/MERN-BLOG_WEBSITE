@@ -7,7 +7,7 @@ const DashboardUser = ({users}) => {
    <div>
         <div className="bg-gray-800 p-6 rounded-lg shadow-md">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold">Recent Users</h3>
+            <h3 className="text-lg font-bold text-white">Recent Users</h3>
             <button className="text-purple-400 border border-purple-400 px-3 py-1 rounded-md">
               See all
             </button>
@@ -36,7 +36,7 @@ const DashboardUser = ({users}) => {
                       </div>
                     )}
                   </td>
-                  <td className="py-2">{user.username}</td>
+                  <td className="py-2 text-white">{user.username}</td>
                   <td className="py-2">{user?.isAdmin?(<p className=" text-red-700 font-medium">Admin</p>):(<p className=" text-gray-400">User</p>)}</td>
                 </tr>
               ))}

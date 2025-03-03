@@ -757,3 +757,38 @@ export const deleteCommentReply = async (req, res) => {
 
 
 
+// make admin
+
+export const makeAdmin = async (req, res, next) => {
+  try {
+    // Fetch the current user
+    const user = await UserSchema.findById(req.params.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Toggle the isAdmin field
+    const updatedUser = await UserSchema.findByIdAndUpdate(
+      req.params.userId,
+      { $set: { isAdmin: !user.isAdmin } }, // Toggle admin status
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: updatedUser.isAdmin
+        ? "User is now an admin"
+        : "User is now a regular user",
+      user: {
+        _id: updatedUser._id,
+        username: updatedUser.username,
+        profilePicture: updatedUser.profilePicture,
+        email: updatedUser.email,
+        isAdmin: updatedUser.isAdmin,
+      },
+    });
+  } catch (error) {
+    console.error("Error toggling admin status:", error);
+    res.status(500).json({ message: "Could not update user admin status", error });
+  }
+};
