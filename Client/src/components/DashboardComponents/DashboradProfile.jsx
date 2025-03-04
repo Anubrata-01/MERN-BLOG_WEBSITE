@@ -8,21 +8,20 @@ import { useAtom } from "jotai";
 
 const DashboardProfile = () => {
   const navigate = useNavigate();
-  const [profileData, setProfileData] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
+ 
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [updatedSuccessMessage,setUpdatedSuccessMessage]=useState(false)
-  // const [imageFile, setImageFile] = useState(null);
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [userInfo, setUserInfo] = useAtom(userInfoAtom);
   const imageRef = useRef(null);
 
   const { username, email, isAdmin, _id, profilePicture } = userInfo?.user || {};
-
+  const [profileData, setProfileData] = useState({
+    username: username || "",
+    email: email ||"",
+    password: "",
+  });
   const handleUpdateProfile = async () => {
     try {
       setIsUpdating(true);
@@ -42,9 +41,8 @@ const DashboardProfile = () => {
     const file = event.target.files[0];
     if (file) {
       try {
-        // You can add your image upload logic here (e.g., upload to server).
+        
         console.log("Selected file:", file);
-        // setImageFile(file);
         setImageFileUrl(URL.createObjectURL(file) )
         const fileName= `${Date.now()}.${file.name.split('.').pop()}`;
         const { data, error } = await supabase.storage

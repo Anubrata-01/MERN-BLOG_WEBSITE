@@ -356,35 +356,38 @@ export const getUsers = async (req, res, next) => {
 
 // *updateprofile* function
 
+
+
 export const updateUserProfile = async (req, res, next) => {
-  const { username, email, password,profilePicture } = req.body;
-  // Validation
+  const { username, email, password, profilePicture } = req.body;
+
   if (!username || username.length < 7 || username.length > 20) {
-    return next(
-      errorHandler(400, "Username must be between 7 and 20 characters")
-    );
+    return next(errorHandler(400, "Username must be between 7 and 20 characters"));
   }
   if (!/^[a-zA-Z0-9]+$/.test(username)) {
-    return next(
-      errorHandler(400, "Username can only contain letters and numbers")
-    );
+    return next(errorHandler(400, "Username can only contain letters and numbers"));
   }
   if (password && password.length < 6) {
     return next(errorHandler(400, "Password must be at least 6 characters"));
   }
 
   try {
-    const hashedPassword = password
-      ? await bcrypt.hash(password, 10)
-      : undefined;
+    // Fetch existing user
+    const existingUser = await UserSchema.findById(req.params.userId);
+    if (!existingUser) {
+      return next(errorHandler(404, "User not found"));
+    }
 
+    const hashedPassword = password ? await bcrypt.hash(password, 10) : existingUser.password;
+
+    // Update user
     const updatedUser = await UserSchema.findByIdAndUpdate(
       req.params.userId,
       {
         $set: {
           username,
           email,
-          password: hashedPassword || req.user.password,
+          password: hashedPassword,
           profilePicture
         },
       },
@@ -397,6 +400,7 @@ export const updateUserProfile = async (req, res, next) => {
     next(error);
   }
 };
+
 
 
 // deleteUser 
