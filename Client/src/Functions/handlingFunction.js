@@ -1,6 +1,6 @@
 import {
   DELETE_USER_PROFILE_URL,
-  FETCH_COMMENTS_URL,
+  FETCH_ALL_COMMENTS_URL,
   FETCH_POSTS_URL,
   FETCH_USER_URL,
   INFO_URL,
@@ -196,9 +196,9 @@ export const fetchPostsdataBySlug = async (postSlug) => {
 };
 
 
-export const fetchAllComments=async()=>{
+export const fetchAllComments=async(limit,startIndex)=>{
   try{
-    const response=await fetch(`${FETCH_COMMENTS_URL}`,{
+    const response=await fetch(`${FETCH_ALL_COMMENTS_URL}?limit=${limit}&startIndex=${startIndex}`,{
       method:"GET",
       headers:{"Content-Type":"application/json"},
       credentials:"include"

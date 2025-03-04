@@ -5,7 +5,7 @@ import DashboradPosts from "./DashboradPosts";
 import { userInfoAtom } from "../../StoreContainer/store.js";
 import { useAtom } from "jotai";
 import { useQuery } from "@tanstack/react-query";
-import { fetchPostsdata, fetchUsersData } from "../../Functions/handlingFunction.js";
+import { fetchAllComments, fetchPostsdata, fetchUsersData } from "../../Functions/handlingFunction.js";
 
 const Dashboard = () => {
   const [userInfo] = useAtom(userInfoAtom);
@@ -30,12 +30,25 @@ const Dashboard = () => {
   });
 
   console.log(post);
+
+  const { data: comments } = useQuery({
+    queryKey: ["commentsData", userInfo?.user?.isAdmin, 3],
+    queryFn: ({ queryKey }) => {
+      const [, , limit] = queryKey;
+      return fetchAllComments(limit);
+    },
+    enabled: userInfo?.user?.isAdmin,
+  })
+  console.log(comments);
   const totalUsers = data?.totalUsers ?? 0;
   const totalPosts = post?.totalPosts ?? 0;
+  const totalComments = comments?.totalComments ?? 0;
   const lastMonthUsers = data?.lastMonthUsers ?? 0;
   const lastMonthPosts = post?.lastMonthPosts ?? 0;
+  const lastMonthComments = comments?.lastMonthComments ?? 0
   const users = data?.users ?? [];
   const posts = post?.posts ?? [];
+  const commentsData = comments?.comments ?? [];
 
   const stats = [
     {
@@ -48,8 +61,8 @@ const Dashboard = () => {
     },
     {
       title: "Total Comments",
-      count: 14,
-      change: "+2",
+      count: totalComments,
+      change: `+${lastMonthComments}`,
       description: "Last month",
       icon: <FaComments className="text-2xl text-white" />,
       bgColor: "bg-purple-600",
@@ -95,7 +108,7 @@ const Dashboard = () => {
         <DashboardUser users={users} />
 
         {/* Recent Comments */}
-        <DashboardComments />
+        <DashboardComments  comments={commentsData}/>
 
         {/* Recent Posts */}
         <DashboradPosts posts={posts} />

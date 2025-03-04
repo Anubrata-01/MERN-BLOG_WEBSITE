@@ -7,13 +7,12 @@ import Dashboard from '../components/DashboardComponents/Dashboard';
 import DashboradProfile from '../components/DashboardComponents/DashboradProfile';
 import PostDashboard from '../components/PostDashboard';
 import UserComponent from '../components/UserComponent';
+import CommentsComponent from '../components/CommentsComponent';
 
 const Profile = () => {
   const [userInfo] = useAtom(userInfoAtom);
   const location = useLocation();
   const [tab, setTab] = useState('');
-
-  // Extract the 'tab' parameter from the URL
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const tabFromUrl = urlParams.get('tab');
@@ -33,6 +32,7 @@ const Profile = () => {
         {tab === 'profile' && <DashboradProfile userInfo={userInfo} />}
         {tab === 'users' && <UserComponent />}
         {tab === 'post' && <PostDashboard />}
+        {tab === 'comments' && <CommentsComponent/>}
       </div>
     </div>
   );

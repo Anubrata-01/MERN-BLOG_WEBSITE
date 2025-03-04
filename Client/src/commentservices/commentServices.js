@@ -2,14 +2,14 @@
 import axios from "axios";
 import {
   CREATE_COMMENT_URL,
-  FETCH_COMMENTS_URL,
   DELETE_COMMENT_URL,
   REPLY_COMMENT_URL,
   AUTH_ROUTES,
+  FETCH_COMMENTS_FOR_POST_URL,
 } from "../constant/constantfile";
 
 export const fetchComments = async (postId) => {
-  const response = await axios.get(`${FETCH_COMMENTS_URL}${postId}`, {
+  const response = await axios.get(`${FETCH_COMMENTS_FOR_POST_URL}${postId}`, {
     withCredentials: true, // Ensure credentials are included if needed
   });
   return response.data;
