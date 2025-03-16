@@ -1,4 +1,6 @@
-import { FaUserFriends, FaComments, FaClipboardList } from "react-icons/fa";
+// import { FaUserFriends, FaComments, FaClipboardList } from "react-icons/fa";
+import { Users,MessagesSquare,ClipboardList } from 'lucide-react';
+
 import DashboardUser from "./DashboardUser";
 import DashboardComments from "./DashboardComments";
 import DashboradPosts from "./DashboradPosts";
@@ -56,7 +58,7 @@ const Dashboard = () => {
       count: totalUsers,
       change: `+${lastMonthUsers}`,
       description: "Last month",
-      icon: <FaUserFriends className="text-2xl text-white" />,
+      icon: <Users className="text-2xl text-white" />,
       bgColor: "bg-teal-600",
     },
     {
@@ -64,7 +66,7 @@ const Dashboard = () => {
       count: totalComments,
       change: `+${lastMonthComments}`,
       description: "Last month",
-      icon: <FaComments className="text-2xl text-white" />,
+      icon: <MessagesSquare className="text-2xl text-white" />,
       bgColor: "bg-purple-600",
     },
     {
@@ -72,7 +74,7 @@ const Dashboard = () => {
       count: totalPosts,
       change: `+${lastMonthPosts}`,
       description: "Last month",
-      icon: <FaClipboardList className="text-2xl text-white" />,
+      icon: <ClipboardList className="text-2xl text-white" />,
       bgColor: "bg-green-600",
     },
   ];

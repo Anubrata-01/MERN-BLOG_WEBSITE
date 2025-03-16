@@ -12,30 +12,32 @@ import { darkModeAtom } from "../StoreContainer/store.js";
 import { useAtom } from "jotai";
 
 const PostPage = () => {
-  const { postSlug } = useParams(); // Get slug from URL
-  const [darkMode] = useAtom(darkModeAtom); // Using Jotai Atom
+  const { postSlug } = useParams();
+  const [darkMode] = useAtom(darkModeAtom);
 
-  const { data, isError, isLoading } = useQuery({
+  // Fetch the blog post by slug
+  const {
+    data,
+    isError,
+    isLoading,
+  } = useQuery({
     queryKey: ["blogDetails", postSlug],
-    queryFn: ({ queryKey }) => {
-      const [, slug] = queryKey;
-      return fetchPostsdataBySlug(slug); // Fetch blog details by slug
-    },
-    enabled: !!postSlug, // Ensure slug is defined
-  });
-
-  const { data: post } = useQuery({
-    queryKey: ["recentPosts", 4, data?.posts?.length],
-    queryFn: ({ queryKey }) => {
-      const [, limit, startIndex] = queryKey;
-      console.log(startIndex);
-      return fetchPostsdata(limit, startIndex);
-    },
+    queryFn: ({ queryKey }) => fetchPostsdataBySlug(queryKey[1]),
     enabled: !!postSlug,
   });
 
-  console.log(post)
-  if (isLoading) {
+  // Fetch recent posts (dependent on data length)
+  const {
+    data: recentPosts,
+    isLoading: isRecentLoading,
+  } = useQuery({
+    queryKey: ["recentPosts", 4, data?.posts?.length],
+    queryFn: ({ queryKey }) => fetchPostsdata(queryKey[1], queryKey[2]),
+    enabled: !!data, // This ensures the second query only runs when the first one completes successfully
+  });
+
+  // Handling loading state
+  if (isLoading || isRecentLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-800">
         <div className="loader"></div>
@@ -43,6 +45,7 @@ const PostPage = () => {
     );
   }
 
+  // Handling error state
   if (isError) {
     return (
       <div className="text-center text-red-500">
@@ -51,11 +54,16 @@ const PostPage = () => {
     );
   }
 
-  if (!data || !data.posts || data.posts.length === 0) {
-    return <div className="text-center">No blog found for the given slug.</div>;
+  // No data state
+  if (!data?.posts?.length) {
+    return (
+      <div className="text-center">
+        No blog found for the given slug.
+      </div>
+    );
   }
 
-  const { title, category, image, content,_id } = data.posts[0];
+  const { title, category, image, content, _id } = data.posts[0];
 
   return (
     <div
@@ -87,7 +95,11 @@ const PostPage = () => {
         {image && (
           <div className="mb-6">
             <img
-              src={image.startsWith("http") ? image : `${import.meta.env.VITE_BACKEND_URL}${image}`} 
+              src={
+                image.startsWith("http")
+                  ? image
+                  : `${import.meta.env.VITE_BACKEND_URL}${image}`
+              }
               alt={title}
               className="w-full h-auto rounded-lg shadow-lg"
             />
@@ -104,34 +116,37 @@ const PostPage = () => {
 
       {/* Comment Section */}
       <div className="p-4 max-w-3xl mx-auto">
-        <CommentSection postId={_id}/>
+        <CommentSection postId={_id} />
       </div>
 
       {/* Recent Posts Section */}
       <div className="p-6 max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold text-center mb-4">Recent Posts</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {post?.posts.length > 0
-            ? post?.posts.map((post) => (
-                <div
-                  key={post?.slug}
-                  className={`cursor-pointer rounded-lg p-4 transition-transform duration-300 hover:scale-105 ${
-                    darkMode
-                      ? "bg-gray-800 bg-opacity-80 shadow-lg"
-                      : "bg-white bg-opacity-90 shadow-md"
-                  }`}
-                >
-                  <PostCard post={post} />
-                </div>
-              ))
-            : "No recent posts available!"}
+          {recentPosts?.posts?.length ? (
+            recentPosts.posts.map((post) => (
+              <div
+                key={post?.slug}
+                className={`cursor-pointer rounded-lg p-4 transition-transform duration-300 hover:scale-105 ${
+                  darkMode
+                    ? "bg-gray-800 bg-opacity-80 shadow-lg"
+                    : "bg-white bg-opacity-90 shadow-md"
+                }`}
+              >
+                <PostCard post={post} />
+              </div>
+            ))
+          ) : (
+            <div className="text-center col-span-2">
+              No recent posts available!
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-// PropTypes validation
 PostPage.propTypes = {
   fetchPostsdataBySlug: PropTypes.func,
   userInfo: PropTypes.shape({

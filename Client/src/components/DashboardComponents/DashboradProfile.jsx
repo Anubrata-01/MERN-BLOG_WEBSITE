@@ -88,13 +88,20 @@ const DashboardProfile = () => {
           className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-700 flex items-center justify-center cursor-pointer"
           onClick={() => imageRef.current.click()}
         >
-          {profilePicture ? (
-            <img src={ imageFileUrl?`${imageFileUrl}`:profilePicture} alt="Profile" className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-white text-2xl font-bold">
-              {username?.[0]?.toUpperCase() || "U"}
-            </span>
-          )}
+          {profilePicture || imageFileUrl ? (
+    <picture>
+      <source srcSet={imageFileUrl ? `${imageFileUrl}` : profilePicture} type="image/*" />
+      <img
+        src={imageFileUrl ? `${imageFileUrl}` : profilePicture}
+        alt="Profile"
+        className="w-full h-full object-cover"
+      />
+    </picture>
+  ) : (
+    <span className="text-white text-2xl font-bold">
+      {username?.[0]?.toUpperCase() || "U"}
+    </span>
+  )}
           {/* Hidden File Input */}
           <input
             type="file"

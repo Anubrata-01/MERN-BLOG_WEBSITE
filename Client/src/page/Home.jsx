@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { TypeAnimation } from "react-type-animation";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +10,6 @@ import PostCard from "../components/PostCard";
 const Home = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [limit, setLimit] = useState(4);
-  const [posts, setPosts] = useState([]); // Store fetched posts
   const [darkMode] = useAtom(darkModeAtom);
   const [userInfo] = useAtom(userInfoAtom);
 
@@ -19,13 +18,20 @@ const Home = () => {
     queryFn: () => fetchPostsdata(limit),
     staleTime: 5000,
     cacheTime: 60000,
+    keepPreviousData: true, // prevents flashing when refetching
   });
 
-  useEffect(() => {
-    if (data?.posts) {
-      setPosts(data.posts); // Update posts only when data changes
-    }
-  }, [data]);
+  // Only update the date string when currentDate changes
+  const formattedDate = useMemo(
+    () =>
+      currentDate.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+    [currentDate]
+  );
 
   useEffect(() => {
     const intervalId = setInterval(() => setCurrentDate(new Date()), 1000);
@@ -33,29 +39,42 @@ const Home = () => {
   }, []);
 
   const handleShowMore = async () => {
-    const newLimit = limit + 2;
-    setLimit(newLimit);
-    const newData = await refetch(); // Fetch more data manually
-
-    if (newData.data?.posts) {
-      setPosts((prevPosts) => [...prevPosts, ...newData.data.posts]); // Append new posts
-    }
+    setLimit((prev) => prev + 2);
+    await refetch(); // no need to manually handle posts, React Query handles data
   };
 
-  const formatDate = (date) =>
-    date.toLocaleDateString("en-US", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+  const renderPostList = () => {
+    if (isLoading && !data?.posts?.length) {
+      return <p className="text-center py-3">Loading...</p>;
+    }
+
+    if (isError) {
+      return <p className="text-red-500 text-center py-3">An error occurred!</p>;
+    }
+
+    if (!data?.posts?.length) {
+      return <p className="text-center py-3">No recent posts available!</p>;
+    }
+
+    return data.posts.map((post) => (
+      <div
+        key={post?.slug}
+        className={`cursor-pointer p-6 rounded-lg shadow-md transition-all ${
+          darkMode ? "bg-gray-700" : "bg-gray-100"
+        }`}
+      >
+        <PostCard post={post} />
+      </div>
+    ));
+  };
 
   return (
     <div
-      className={`min-h-screen py-20 px-6 sm:px-12 lg:px-24 flex flex-col justify-center items-center 
+      className={`min-h-screen py-20 px-6 sm:px-12 lg:px-24 flex flex-col justify-center items-center transition-colors duration-300
         ${darkMode ? "bg-gray-900 text-white" : "bg-orange-100 text-gray-900"}`}
     >
       <div className="max-w-4xl w-full text-center">
+        {/* Header */}
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6">
           Welcome to{" "}
           <span className={darkMode ? "text-indigo-400" : "text-orange-600"}>
@@ -63,6 +82,7 @@ const Home = () => {
           </span>
         </h1>
 
+        {/* Typing animation */}
         <div className="text-2xl md:text-3xl font-medium mb-8">
           <TypeAnimation
             sequence={[
@@ -78,12 +98,13 @@ const Home = () => {
           />
         </div>
 
+        {/* Subtitle */}
         <p className="text-lg md:text-xl mb-12 leading-relaxed">
-          A space for thoughts, experiences, and discoveries. Join me on this
-          journey of learning and growth.
+          A space for thoughts, experiences, and discoveries. Join me on this journey of learning and growth.
         </p>
 
-        <div className="flex space-x-4 justify-center">
+        {/* Action buttons */}
+        <div className="flex space-x-4 justify-center mb-12">
           <Link
             to="/projects"
             className={`inline-flex items-center px-6 py-3 text-base font-medium rounded-md shadow-sm transition-all 
@@ -97,50 +118,39 @@ const Home = () => {
               ${
                 darkMode
                   ? "border-gray-700 text-gray-300 bg-gray-800 hover:bg-gray-700"
-                  : "border-gray-300 text-gray-700 bg-green-400 hover:bg-gray-50"
+                  : "border-gray-300 text-gray-700 bg-green-400 hover:bg-green-500"
               }`}
           >
             View Posts
           </Link>
         </div>
 
-        <p className="mt-12 text-sm">{formatDate(currentDate)}</p>
+        {/* Date */}
+        <p className="text-sm">{formattedDate}</p>
 
-        <div>
-          <h1 className="text-xl font-extrabold mb-10 mt-10">Recent Posts</h1>
+        {/* Posts Section */}
+        <div className="w-full">
+          <h2 className="text-xl font-extrabold mb-10 mt-10">Recent Posts</h2>
           <div
-            className={`p-10 rounded-md grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto transition-all 
-              ${
-                darkMode
-                  ? "bg-gray-800 text-gray-100"
-                  : "bg-orange-200 text-gray-800"
-              }`}
+            className={`p-10 rounded-md grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto transition-all ${
+              darkMode ? "bg-gray-800 text-gray-100" : "bg-orange-200 text-gray-800"
+            }`}
           >
-            {isLoading && posts.length === 0 ? (
-              <p className="text-center py-3">Loading...</p>
-            ) : isError ? (
-              <p className="text-red-500 text-center py-3">An error occurred!</p>
-            ) : posts.length > 0 ? (
-              posts.map((post) => (
-                <div
-                  key={post?.slug}
-                  className={`cursor-pointer p-6 rounded-lg shadow-md transition-all 
-                    ${darkMode ? "bg-gray-700" : "bg-gray-100"}`}
-                >
-                  <PostCard post={post} />
-                </div>
-              ))
-            ) : (
-              <p>No recent posts available!</p>
-            )}
+            {renderPostList()}
           </div>
         </div>
 
+        {/* Show More Button */}
         <button
           onClick={handleShowMore}
-          className="w-full text-lg py-7 transition-all"
+          disabled={isLoading} // prevent spam clicks
+          className={`w-full text-lg py-7 transition-all ${
+            darkMode
+              ? "text-indigo-400 hover:text-indigo-500"
+              : "text-orange-600 hover:text-orange-700"
+          } disabled:opacity-50`}
         >
-          Show more
+          {isLoading ? "Loading..." : "Show more"}
         </button>
       </div>
     </div>
@@ -148,3 +158,4 @@ const Home = () => {
 };
 
 export default Home;
+

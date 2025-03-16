@@ -64,7 +64,7 @@ const PostDashboard = () => {
         setMessage(data.message || "Failed to delete the post.");
       }
     } catch (error) {
-      setMessage("Something went wrong!",error);
+      setMessage("Something went wrong!", error);
     }
   };
 
@@ -97,11 +97,15 @@ const PostDashboard = () => {
                   </td>
                   <td className="px-4 py-3">
                     <Link to={`/post/${post.slug}`}>
-                      <img
-                        src={post?.image}
-                        alt={post.slug}
-                        className="w-12 h-12 object-cover rounded-md"
-                      />
+                      <picture>
+                        <source srcSet={`${post?.image}?format=webp`} type="image/webp" />
+                        <source srcSet={post?.image} type="image/jpeg" />
+                        <img
+                          src={post?.image}
+                          alt={post.slug}
+                          className="w-12 h-12 object-cover rounded-md"
+                        />
+                      </picture>
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-gray-100 font-medium">
@@ -137,11 +141,15 @@ const PostDashboard = () => {
               <div className="flex justify-between">
                 <p className="text-gray-300">{new Date(post.updatedAt).toLocaleDateString()}</p>
                 <Link to={`/post/${post.slug}`}>
-                  <img
-                    src={post?.image}
-                    alt={post.slug}
-                    className="w-12 h-12 object-cover rounded-md"
-                  />
+                  <picture>
+                    <source srcSet={`${post?.image}?format=webp`} type="image/webp" />
+                    <source srcSet={post?.image} type="image/jpeg" />
+                    <img
+                      src={post?.image}
+                      alt={post.slug}
+                      className="w-12 h-12 object-cover rounded-md"
+                    />
+                  </picture>
                 </Link>
               </div>
               <h3 className="text-gray-100 font-medium">

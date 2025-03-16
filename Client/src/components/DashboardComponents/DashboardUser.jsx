@@ -28,7 +28,8 @@ const DashboardUser = ({users}) => {
                       <img
                         src={user.profilePicture}
                         alt={user.username}
-                        className="w-10 h-10 rounded-full"
+                        className="w-10 h-10 rounded-full aspect-[3/2]  object-cover"
+                        loading="lazy"
                       />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
